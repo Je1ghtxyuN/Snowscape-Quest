@@ -253,7 +253,7 @@ Animator:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 224451321}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 9100000, guid: fa32c97eeb439a24c87b64016e394ee4, type: 2}
   m_CullingMode: 0
@@ -1535,6 +1535,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1961318157716051811, guid: b85c7e7543cd837448c12f450cecaad5, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2632219754002825933, guid: b85c7e7543cd837448c12f450cecaad5, type: 3}
       propertyPath: m_LocalPosition.x
       value: -6.20105
