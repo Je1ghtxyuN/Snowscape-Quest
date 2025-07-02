@@ -10,6 +10,11 @@ public class Enemy : MonoBehaviour
     //血条UI预制体
     [SerializeField] private GameObject healthBarPrefab;
 
+
+    //死亡状态
+    private bool isDead = false;
+
+    //创建对象
     private Health healthSystem;
     private HealthUI healthUI;
 
@@ -17,6 +22,9 @@ public class Enemy : MonoBehaviour
     {
         //初始化血量系统
         healthSystem = new Health(initialHealth);
+
+        //订阅死亡事件
+        healthSystem.OnDeath += Die;
 
         //实例化血条UI
         if (healthBarPrefab != null)
@@ -35,7 +43,7 @@ public class Enemy : MonoBehaviour
         InvokeRepeating("ApplyTestDamage", 3f, 1f);
     }
 
-
+    //受伤测试
     private void ApplyTestDamage()
     {
         TakeDamage(10f);
@@ -45,18 +53,43 @@ public class Enemy : MonoBehaviour
     //收到伤害的方法
     public void TakeDamage(float amount)
     {
+        if (isDead) return; //已死亡不再响应伤害
         healthSystem.TakeDamage(amount);
         //可添加伤害特效、音效等
     }
 
-    //死亡
+    //死亡处理（由OnDeath事件触发）
     private void Die()
     {
-        //死亡处理
-        //1.播放死亡动画
-        //2.移除碰撞体
-        //3.掉落物品/经验值
-        //4.销毁对象
-        Destroy(gameObject, 1.5f);
+        if (isDead) return; //避免重复触发
+        isDead = true;
+
+        //取消事件订阅防止重复调用
+        healthSystem.OnDeath -= Die;
+
+        //死亡逻辑
+        StartCoroutine(DeathRoutine());
+    }
+
+    //死亡协程（处理动画和销毁）
+    private IEnumerator DeathRoutine()
+    {
+        //播放死亡动画（伪代码）
+        //animator.SetTrigger("Die");
+        //yield return new WaitForSeconds(1.0f); //等待动画完成
+
+        //销毁血条UI
+        if (healthUI != null) Destroy(healthUI.gameObject);
+
+        //销毁本体
+        yield return new WaitForSeconds(0.5f);
+        Destroy(gameObject);
+    }
+
+    void OnDestroy()
+    {
+        // 安全取消事件订阅
+        if (healthSystem != null)
+            healthSystem.OnDeath -= Die;
     }
 }

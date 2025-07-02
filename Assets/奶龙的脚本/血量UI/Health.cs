@@ -6,10 +6,10 @@ public class Health
     private float currentHealth;
     private float maxHealth;
 
-    // 事件：血量变化时触发
+    //事件：血量变化时触发
     public event System.Action OnHealthChanged;
 
-    // 事件：死亡时触发
+    //事件：死亡时触发
     public event System.Action OnDeath;
 
     //构造函数
