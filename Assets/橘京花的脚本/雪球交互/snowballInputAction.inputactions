@@ -1,0 +1,34 @@
+{
+    "name": "snowballInputAction",
+    "maps": [
+        {
+            "name": "XRI RightHand",
+            "id": "748801c1-ae28-44b5-9821-6b044b14b88b",
+            "actions": [
+                {
+                    "name": "Grip",
+                    "type": "Button",
+                    "id": "6c021422-e9d6-42fb-a09d-e390bc9fbf80",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "a3c087c2-6aff-4e05-899a-241213aaf1c2",
+                    "path": "<XRController>{RightHand}/gripPressed",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Grip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

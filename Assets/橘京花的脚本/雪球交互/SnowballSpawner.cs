@@ -58,7 +58,12 @@ public class SnowballSpawner : MonoBehaviour
 
     private void OnGripReleased(InputAction.CallbackContext context)
     {
-        // 结束交互时会自动投掷（XRGrabInteractable已处理）
-        currentSnowball = null;
+        if (currentSnowball != null)
+        {
+            Rigidbody rb = currentSnowball.GetComponent<Rigidbody>();
+            rb.isKinematic = false; 
+            rb.velocity = transform.forward * throwForceMultiplier;
+            currentSnowball = null;
+        }
     }
 }

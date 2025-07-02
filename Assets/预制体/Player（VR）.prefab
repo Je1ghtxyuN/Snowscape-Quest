@@ -277,7 +277,7 @@ PrefabInstance:
       addedObject: {fileID: 3498012073340499933}
     - targetCorrespondingSourceObject: {fileID: 7277802327528778795, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 9088446863861261396}
+      addedObject: {fileID: 429256358389823386}
   m_SourcePrefab: {fileID: 100100000, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
 --- !u!1 &3697705405546085139 stripped
 GameObject:
@@ -421,7 +421,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1
   m_PhysicsTriggerInteraction: 1
---- !u!114 &9088446863861261396
+--- !u!114 &429256358389823386
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -430,21 +430,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 3697705405546085139}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1323b47dab763dd4c962187017bccec4, type: 3}
+  m_Script: {fileID: 11500000, guid: d4cc673f53498c144b5e7651d3865882, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  snowballPrefab: {fileID: 0}
-  gripAction:
-    m_UseReference: 0
-    m_Action:
-      m_Name: Grip
-      m_Type: 0
-      m_ExpectedControlType: 
-      m_Id: f956ef69-196c-4ac0-ac3f-1ca2caf68817
-      m_Processors: 
-      m_Interactions: 
-      m_SingletonActionBindings: []
-      m_Flags: 0
-    m_Reference: {fileID: 0}
+  snowballPrefab: {fileID: 8584692561766056644, guid: 99ca4b873ebd7314ca3833bd0c0bc8c9, type: 3}
+  gripAction: {fileID: 4324797343224664871, guid: 761bf6a792a0c114fa0953a9b458c7e4, type: 3}
   spawnOffset: 0.1
   throwForceMultiplier: 1.5
