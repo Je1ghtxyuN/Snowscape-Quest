@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
 public class Enemy : MonoBehaviour
@@ -32,6 +33,13 @@ public class Enemy : MonoBehaviour
 
         //测试用：3秒后开始受到伤害
         InvokeRepeating("ApplyTestDamage", 3f, 1f);
+    }
+
+
+    private void ApplyTestDamage()
+    {
+        TakeDamage(10f);
+        UnityEngine.Debug.Log("Enemy测试受到伤害");
     }
 
     //收到伤害的方法
