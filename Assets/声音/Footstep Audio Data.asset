@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 712888de6e6802549b701f9af5b2a3e6, type: 3}
+  m_Name: Footstep Audio Data
+  m_EditorClassIdentifier: 
+  FootstepAudio:
+  - Tag: snow
+    AudioClips:
+    - {fileID: 8300000, guid: 0c3b51e0dbdf01941b91098e5ce650eb, type: 3}
+    - {fileID: 8300000, guid: fa813b9099324844d9c9b023e0c0593e, type: 3}
+    - {fileID: 8300000, guid: a3acf5bde6d01aa45bf17975ec69c077, type: 3}
+    - {fileID: 8300000, guid: 34bd9f32b2754b94b8838f05bf66782a, type: 3}
+    - {fileID: 8300000, guid: a0ac38acdafe9274ba0d1512585f6b97, type: 3}
+    - {fileID: 8300000, guid: d7c720f3ccd5b8446a7485aecc7ba92f, type: 3}
+    - {fileID: 8300000, guid: f67dbdf0533e2cd49bacb73cdd295030, type: 3}
+    - {fileID: 8300000, guid: 2ccb8a247d35c1444a284f650f763c54, type: 3}
+    - {fileID: 8300000, guid: 07806a81b474f01409ce77ec839c81b3, type: 3}
+    - {fileID: 8300000, guid: bb9f67636a4aa684195d5f0da11dcf3b, type: 3}
+    - {fileID: 8300000, guid: 5dd7f88e7eabf064b91ec22135d44f91, type: 3}
+    - {fileID: 8300000, guid: 971d83e6580295e4fa2e593c8c7201f2, type: 3}
+    Delay: 0.5
+  - Tag: water
+    AudioClips:
+    - {fileID: 8300000, guid: d323f962cb9a771429839fd692c4a1d4, type: 3}
+    - {fileID: 8300000, guid: a72b6bd41569d424f83de5d5857cee91, type: 3}
+    - {fileID: 8300000, guid: 2125ed3ad92f16341b38c9b4ae035400, type: 3}
+    - {fileID: 8300000, guid: d8f710ae26585ec4588ce54c6b0f617a, type: 3}
+    - {fileID: 8300000, guid: d4bf1214a23e4a54da9d8fa45fe95299, type: 3}
+    - {fileID: 8300000, guid: 5513cd6750bb75b44a1d8d633b607d4d, type: 3}
+    - {fileID: 8300000, guid: 368650ba2c2fece408e54ccd8de96336, type: 3}
+    - {fileID: 8300000, guid: e54534ca0eb7b644a91b71f40fa3c3f8, type: 3}
+    Delay: 0.5
