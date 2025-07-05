@@ -8,6 +8,7 @@ TagManager:
   - Enemy
   - snow
   - water
+  - Snowball
   layers:
   - Default
   - TransparentFX
@@ -15,8 +16,8 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
+  - Obstacle
+  - Player
   - 
   - 
   - 

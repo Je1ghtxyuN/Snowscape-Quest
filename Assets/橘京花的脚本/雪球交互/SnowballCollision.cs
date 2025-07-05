@@ -7,6 +7,7 @@ public class SnowballCollision : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
+        Enemy enemyScript = collision.gameObject.GetComponent<Enemy>();
         //击中任何物体都销毁雪球
         Destroy(gameObject);
 
@@ -21,7 +22,7 @@ public class SnowballCollision : MonoBehaviour
         {
             Debug.Log("击中敌人！");
             // 敌人受伤接口
-           
+            enemyScript.TakeDamage(20f);
         }
     }
 }

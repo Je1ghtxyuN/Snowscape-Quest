@@ -40,15 +40,15 @@ public class Enemy : MonoBehaviour
         }
 
         //测试用：3秒后开始受到伤害
-        InvokeRepeating("ApplyTestDamage", 3f, 1f);
+        //InvokeRepeating("ApplyTestDamage", 3f, 1f);
     }
 
     //受伤测试
-    private void ApplyTestDamage()
-    {
-        TakeDamage(10f);
-        UnityEngine.Debug.Log("Enemy测试受到伤害");
-    }
+    //private void ApplyTestDamage()
+    //{
+    //    TakeDamage(10f);
+    //    UnityEngine.Debug.Log("Enemy测试受到伤害");
+    //}
 
     //收到伤害的方法
     public void TakeDamage(float amount)
