@@ -17,13 +17,15 @@ public class PlayerHealth : MonoBehaviour
         // 创建固定血条UI
         if (fixedHealthBarPrefab != null)
         {
-            GameObject healthBarObj = Instantiate(fixedHealthBarPrefab);
-            healthUI = healthBarObj.GetComponent<FixedHealthUI>();
-            healthUI.Initialize(healthSystem);
+            //橘京花：我暂时先注释掉了
+            //GameObject healthBarObj = Instantiate(fixedHealthBarPrefab);
+            //healthUI = healthBarObj.GetComponent<FixedHealthUI>();
+            
+            //healthUI.Initialize(healthSystem);
         }
 
         //测试用：3秒后开始受到伤害
-        InvokeRepeating("ApplyTestDamage", 3f, 1f);
+        //InvokeRepeating("ApplyTestDamage", 3f, 1f);
     }
 
     //受伤测试
