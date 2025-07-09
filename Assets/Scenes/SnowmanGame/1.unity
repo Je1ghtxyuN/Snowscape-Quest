@@ -188,12 +188,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6739845644499322560, guid: 7aa5cc66518245c45bf21a915cb1a7ec, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6739845644499322560, guid: 7aa5cc66518245c45bf21a915cb1a7ec, type: 3}
       propertyPath: healthBarPrefab
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 5429467087999930779, guid: 33b32447657d9074d965765de8ecfbf6, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -557,24 +557,6 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
---- !u!1 &328935424 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2632219754002825934, guid: b85c7e7543cd837448c12f450cecaad5, type: 3}
-  m_PrefabInstance: {fileID: 1862109656}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &328935433
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 328935424}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 588aa035a8fa92043bc04de155cb9027, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  fixedHealthBarPrefab: {fileID: 1698018954499368992, guid: cc45fbf834a226644880f94b38984cda, type: 3}
 --- !u!1 &397443458
 GameObject:
   m_ObjectHideFlags: 0
@@ -6724,10 +6706,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 2632219754002825934, guid: b85c7e7543cd837448c12f450cecaad5, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 328935433}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b85c7e7543cd837448c12f450cecaad5, type: 3}
 --- !u!1001 &1919369115
 PrefabInstance:

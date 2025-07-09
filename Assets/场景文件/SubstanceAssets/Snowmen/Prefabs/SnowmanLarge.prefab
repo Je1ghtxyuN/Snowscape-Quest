@@ -426,6 +426,7 @@ GameObject:
   - component: {fileID: 5886220194709069893}
   - component: {fileID: 1723209314167150388}
   - component: {fileID: 42063699088549538}
+  - component: {fileID: 3782815418131561525}
   m_Layer: 0
   m_Name: SnowmanLarge
   m_TagString: Untagged
@@ -507,6 +508,20 @@ CapsuleCollider:
   m_Height: 2.78
   m_Direction: 1
   m_Center: {x: 0, y: 1, z: 0}
+--- !u!114 &3782815418131561525
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6556078564522670847}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa61cd393f009ec40b70a0bfa810fc61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  initialHealth: 100
+  healthBarPrefab: {fileID: 5429467087999930779, guid: 33b32447657d9074d965765de8ecfbf6, type: 3}
 --- !u!1 &8649580005277367838
 GameObject:
   m_ObjectHideFlags: 0

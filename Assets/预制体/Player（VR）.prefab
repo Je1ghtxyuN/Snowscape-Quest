@@ -278,6 +278,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8298045291338814966, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8296984995963201100}
+    - targetCorrespondingSourceObject: {fileID: 8298045291338814966, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 788162930059392938}
     - targetCorrespondingSourceObject: {fileID: 7277802327414017194, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
       insertIndex: -1
       addedObject: {fileID: 707638238354185743}
@@ -404,6 +407,19 @@ MonoBehaviour:
   footstepAudioData: {fileID: 0}
   raycastDistance: 0.2
   footstepDistance: 2
+--- !u!114 &788162930059392938
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2632219754002825934}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 588aa035a8fa92043bc04de155cb9027, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fixedHealthBarPrefab: {fileID: 1698018954499368992, guid: cc45fbf834a226644880f94b38984cda, type: 3}
 --- !u!1 &3697705405439712146 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7277802327414017194, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
