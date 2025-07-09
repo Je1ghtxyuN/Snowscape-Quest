@@ -555,7 +555,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 588aa035a8fa92043bc04de155cb9027, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fixedHealthBarPrefab: {fileID: 1348739581}
+  fixedHealthBarPrefab: {fileID: 1698018954499368992, guid: cc45fbf834a226644880f94b38984cda, type: 3}
 --- !u!4 &328935434 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2632219754002825933, guid: b85c7e7543cd837448c12f450cecaad5, type: 3}
@@ -7140,4 +7140,3 @@ SceneRoots:
   - {fileID: 172477188}
   - {fileID: 1134580828}
   - {fileID: 90485974}
-  - {fileID: 1368994710}
