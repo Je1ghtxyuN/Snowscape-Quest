@@ -644,6 +644,7 @@ GameObject:
   - component: {fileID: 4274441988436318663}
   - component: {fileID: 6989399055150312925}
   - component: {fileID: 8417962790284963701}
+  - component: {fileID: 678344145006008685}
   m_Layer: 0
   m_Name: baofengxueren
   m_TagString: Untagged
@@ -749,6 +750,21 @@ MonoBehaviour:
   animator: {fileID: 6989399055150312925}
   walkAnimParam: isWalking
   attackAnimParam: Attack
+  dieAnimParam: die
+--- !u!114 &678344145006008685
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3422242025731796399}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa61cd393f009ec40b70a0bfa810fc61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  initialHealth: 100
+  healthBarPrefab: {fileID: 5429467087999930779, guid: 33b32447657d9074d965765de8ecfbf6, type: 3}
 --- !u!1 &3513593233254079888
 GameObject:
   m_ObjectHideFlags: 0

@@ -9,21 +9,20 @@ public class SnowballThrower : MonoBehaviour
 {
     [Header("必填参数")]
     public GameObject snowballPrefab;
-    public InputActionReference gripAction; // 绑定到Grip输入
+    public InputActionReference gripAction;
 
     [Header("投掷参数")]
     [SerializeField] private float spawnOffset = 0.1f;
     [SerializeField][Range(1f, 3f)] private float throwForceMultiplier = 1.5f;
+    [SerializeField] private float minThrowSpeed = 2f; // 新增：最小投掷速度阈值
 
     private XRDirectInteractor interactor;
     private GameObject currentSnowball;
-    private Vector3 throwDirection;
+    private Rigidbody currentSnowballRb; // 缓存Rigidbody引用
 
     private void Awake()
     {
         interactor = GetComponent<XRDirectInteractor>();
-
-        // 配置输入Action
         gripAction.action.Enable();
         gripAction.action.performed += OnGripPressed;
         gripAction.action.canceled += OnGripReleased;
@@ -39,16 +38,21 @@ public class SnowballThrower : MonoBehaviour
     {
         if (currentSnowball == null)
         {
-            // 生成雪球（带偏移防止穿模）
             Vector3 spawnPos = transform.position + transform.forward * spawnOffset;
             currentSnowball = Instantiate(snowballPrefab, spawnPos, Quaternion.identity);
+            currentSnowballRb = currentSnowball.GetComponent<Rigidbody>();
 
-            // 配置物理参数
+            // 确保刚体初始状态正确
+            currentSnowballRb.isKinematic = false;
+            currentSnowballRb.useGravity = true;
+
             var grabInteractable = currentSnowball.GetComponent<XRGrabInteractable>();
             grabInteractable.throwVelocityScale = throwForceMultiplier;
             grabInteractable.throwSmoothingDuration = 0.1f;
 
-            // 立即抓取
+            // 监听释放事件（保险措施）
+            grabInteractable.selectExited.AddListener(OnSnowballReleased);
+
             interactor.StartManualInteraction(grabInteractable as IXRSelectInteractable);
         }
     }
@@ -57,14 +61,40 @@ public class SnowballThrower : MonoBehaviour
     {
         if (currentSnowball != null)
         {
-            // 获取手柄运动方向（世界坐标系）
-            throwDirection = interactor.transform.forward;
+            ReleaseSnowball();
+        }
+    }
 
-            // 强制修正方向（可选）
-            Rigidbody rb = currentSnowball.GetComponent<Rigidbody>();
-            rb.velocity = throwDirection * rb.velocity.magnitude;
+    // 新增：安全释放雪球方法
+    private void ReleaseSnowball()
+    {
+        if (currentSnowballRb != null)
+        {
+            // 确保物理状态正确
+            currentSnowballRb.isKinematic = false;
 
-            currentSnowball = null;
+            // 获取XR交互工具计算的抛出速度
+            Vector3 throwVelocity = currentSnowballRb.velocity;
+
+            // 如果速度太小，赋予最小初速度
+            if (throwVelocity.magnitude < minThrowSpeed)
+            {
+                throwVelocity = interactor.transform.forward * minThrowSpeed;
+            }
+
+            currentSnowballRb.velocity = throwVelocity;
+        }
+
+        currentSnowball = null;
+        currentSnowballRb = null;
+    }
+
+    // 新增：防止XR交互工具异常释放
+    private void OnSnowballReleased(SelectExitEventArgs args)
+    {
+        if (args.interactableObject.transform.gameObject == currentSnowball)
+        {
+            ReleaseSnowball();
         }
     }
 }

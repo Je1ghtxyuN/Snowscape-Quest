@@ -18,6 +18,10 @@ public class EnemyHealth : MonoBehaviour
     private Health healthSystem;
     private HealthUI healthUI;
 
+    private Animator animator;
+
+    //Animator animator = GameObject.GetComponent<Animator>;
+
     void Start()
     {
         //初始化血量系统
@@ -25,6 +29,8 @@ public class EnemyHealth : MonoBehaviour
 
         //订阅死亡事件
         healthSystem.OnDeath += Die;
+
+        animator = GetComponent<Animator>();
 
         //实例化血条UI
         if (healthBarPrefab != null)
@@ -74,15 +80,23 @@ public class EnemyHealth : MonoBehaviour
     //死亡协程（处理动画和销毁）
     private IEnumerator DeathRoutine()
     {
-        //播放死亡动画（伪代码）
-        //animator.SetTrigger("Die");
-        //yield return new WaitForSeconds(1.0f); //等待动画完成
+        // 1. 触发死亡动画
+        if (animator != null)
+        {
+            animator.SetTrigger("die");
+            yield return null; // 确保动画触发器生效
 
-        //销毁血条UI
+            // 直接使用固定1.6秒等待（替代动态获取动画长度）
+            yield return new WaitForSeconds(1.6f);
+        }
+        else
+        {
+            // 没有动画组件时使用保底等待
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        // 销毁逻辑
         if (healthUI != null) Destroy(healthUI.gameObject);
-
-        //销毁本体
-        yield return new WaitForSeconds(0.5f);
         Destroy(gameObject);
     }
 

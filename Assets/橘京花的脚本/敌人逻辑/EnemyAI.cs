@@ -25,6 +25,7 @@ public class EnemyAI : MonoBehaviour
     public Animator animator; // 动画控制器
     public string walkAnimParam = "isWalking"; // 行走动画参数
     public string attackAnimParam = "Attack"; // 攻击动画触发器
+    public string dieAnimParam = "die";
 
     private int currentPatrolIndex = 0; // 当前巡逻点索引
     private bool isWaiting = false; // 是否在等待
