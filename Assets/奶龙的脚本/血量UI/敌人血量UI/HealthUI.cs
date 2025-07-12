@@ -10,7 +10,7 @@ public class HealthUI : MonoBehaviour
     [SerializeField] private GameObject healthBarObject; //整个血条对象
 
     [Header("Settings")]
-    [SerializeField] private Vector3 offset = new Vector3(0, 2.5f, 0); //血条在头顶的位置偏移
+    [SerializeField] private Vector3 offset = new Vector3(0, 1.5f, 0); //血条在头顶的位置偏移
  
     private Transform targetTransform; //跟随的目标(敌人或玩家)
     private Health healthSystem; //关联的生命值系统

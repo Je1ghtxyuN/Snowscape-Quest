@@ -191,9 +191,17 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6739845644499322560, guid: 7aa5cc66518245c45bf21a915cb1a7ec, type: 3}
+      propertyPath: deathSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 1409c98375f652442ba139f1101e1d3d, type: 3}
+    - target: {fileID: 6739845644499322560, guid: 7aa5cc66518245c45bf21a915cb1a7ec, type: 3}
       propertyPath: healthBarPrefab
       value: 
       objectReference: {fileID: 5429467087999930779, guid: 33b32447657d9074d965765de8ecfbf6, type: 3}
+    - target: {fileID: 6739845644499322560, guid: 7aa5cc66518245c45bf21a915cb1a7ec, type: 3}
+      propertyPath: explosionParticlePrefab
+      value: 
+      objectReference: {fileID: 8054298197717898720, guid: a734dcf9f4c05214a81f6eb9aeebbb38, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -577,6 +585,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 172477188}
     m_Modifications:
+    - target: {fileID: 3782815418131561525, guid: 5682f23c5d655874c98f6b3beabc415a, type: 3}
+      propertyPath: deathSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 1409c98375f652442ba139f1101e1d3d, type: 3}
+    - target: {fileID: 3782815418131561525, guid: 5682f23c5d655874c98f6b3beabc415a, type: 3}
+      propertyPath: explosionParticlePrefab
+      value: 
+      objectReference: {fileID: 8054298197717898720, guid: a734dcf9f4c05214a81f6eb9aeebbb38, type: 3}
     - target: {fileID: 5886220194709069893, guid: 5682f23c5d655874c98f6b3beabc415a, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1630,6 +1646,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3030964515146673061, guid: 5ba688e0671fdea4193380edcba764bb, type: 3}
+      propertyPath: deathSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 1409c98375f652442ba139f1101e1d3d, type: 3}
+    - target: {fileID: 3030964515146673061, guid: 5ba688e0671fdea4193380edcba764bb, type: 3}
+      propertyPath: explosionParticlePrefab
+      value: 
+      objectReference: {fileID: 8054298197717898720, guid: a734dcf9f4c05214a81f6eb9aeebbb38, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
