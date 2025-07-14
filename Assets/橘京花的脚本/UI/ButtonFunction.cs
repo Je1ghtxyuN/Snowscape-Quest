@@ -43,4 +43,9 @@ public class ButtonFunction : MonoBehaviour
             Debug.LogWarning("未绑定菜单UI对象！");
         }
     }
+
+    public void reLoadScene()
+    {
+        SceneManager.LoadScene(sceneToSwitch);
+    }
 }

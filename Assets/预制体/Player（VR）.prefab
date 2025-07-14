@@ -423,6 +423,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fixedHealthBarPrefab: {fileID: 1698018954499368992, guid: cc45fbf834a226644880f94b38984cda, type: 3}
+  deathUIPrefab: {fileID: 0}
+  deathFilterMaterial: {fileID: 0}
+  deathTimeScale: 0.3
+  leftHandController: {fileID: 0}
 --- !u!114 &3847760366095690497
 MonoBehaviour:
   m_ObjectHideFlags: 0

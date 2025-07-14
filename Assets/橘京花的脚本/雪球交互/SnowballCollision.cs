@@ -29,7 +29,7 @@ public class SnowballCollision : MonoBehaviour
         if (collision.gameObject.CompareTag("Player"))
         {
             Debug.Log("Íæ¼Ò±»»÷ÖÐ£¡");
-            playerScript.TakeDamage(5f);
+            playerScript.TakeDamage(20f);
 
         }
     }

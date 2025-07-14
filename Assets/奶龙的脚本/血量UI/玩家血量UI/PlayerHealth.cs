@@ -1,67 +1,99 @@
-using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 
 public class PlayerHealth : MonoBehaviour
 {
     [SerializeField] private GameObject fixedHealthBarPrefab;
+    [SerializeField] private GameObject deathUIPrefab; // 新增死亡UI预制体
+    [SerializeField] private Material deathFilterMaterial; // 新增死亡滤镜材质(红色或黑白)
+    [SerializeField] private float deathTimeScale = 0.3f; // 死亡时的时间缩放
+    [SerializeField] private GameObject leftHandController;
+
     private Health healthSystem;
     private FixedHealthUI healthUI;
     private Camera vrCamera;
+    private GameObject deathUIInstance;
+    private bool isDead = false;
 
     void Start()
     {
-        // 初始化血量系统 (100点生命值)
         healthSystem = new Health(100f);
+        healthSystem.OnDeath += Die;
 
-        // 获取VR主摄像机
         vrCamera = Camera.main;
         if (vrCamera == null)
         {
-            UnityEngine.Debug.LogError("Main Camera not found");
+            Debug.LogError("Main Camera not found");
             return;
         }
 
-        // 实例化并配置血条
         CreateHealthBar();
-
-        //测试用：3秒后开始受到伤害
-        //InvokeRepeating("ApplyTestDamage", 3f, 1f);
     }
 
     private void CreateHealthBar()
     {
-        // 将血条实例化为VR摄像机的子物体
         GameObject healthBarObj = Instantiate(
             fixedHealthBarPrefab,
             vrCamera.transform.position,
             vrCamera.transform.rotation,
-            vrCamera.transform // 设置父物体为VR摄像机
+            vrCamera.transform
         );
 
-        // 调整血条位置（摄像机前方1米，下方0.2米）
         healthBarObj.transform.localPosition = new Vector3(0, -0.2f, 1.5f);
         healthBarObj.transform.localRotation = Quaternion.identity;
-
-        // 调整Canvas尺寸（VR中World Space的UI需要小尺寸）
         healthBarObj.transform.localScale = Vector3.one * 0.002f;
 
         healthUI = healthBarObj.GetComponent<FixedHealthUI>();
         healthUI.Initialize(healthSystem);
     }
 
-    //受伤测试
-    private void ApplyTestDamage()
-    {
-        TakeDamage(10f);
-        UnityEngine.Debug.Log("Player测试受到伤害");
-    }
-
-    //收到伤害的方法
     public void TakeDamage(float amount)
     {
-        healthSystem.TakeDamage(amount);
-        //可添加伤害特效、音效等
+        if (!isDead) healthSystem.TakeDamage(amount);
+    }
+
+    private void Die()
+    {
+        if (isDead) return;
+        isDead = true;
+
+
+        // 显示死亡UI
+        ShowDeathUI();
+
+        // 放慢游戏时间
+        Time.timeScale = deathTimeScale;
+
+        // 取消事件订阅
+        healthSystem.OnDeath -= Die;
+    }
+
+   
+
+    private void ShowDeathUI()
+    {
+        // 实例化死亡UI
+        deathUIInstance = Instantiate(
+            deathUIPrefab,
+            vrCamera.transform.position + vrCamera.transform.forward * 1.5f + (-vrCamera.transform.up) * 0.5f,
+            vrCamera.transform.rotation
+        );
+
+        // 调整UI位置和大小
+        //deathUIInstance.transform.localScale = Vector3.one * 0.003f;
+
+    }
+
+    private void DisableLeftHandController()
+    {
+        if (leftHandController != null)
+        {
+            // 禁用控制器游戏对象
+            leftHandController.SetActive(false);
+        }
+        else
+        {
+            Debug.LogWarning("Left hand controller reference not set in PlayerHealth");
+        }
     }
 }

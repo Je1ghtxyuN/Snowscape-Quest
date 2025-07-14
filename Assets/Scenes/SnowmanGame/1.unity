@@ -5900,6 +5900,18 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: 788162930059392938, guid: b85c7e7543cd837448c12f450cecaad5, type: 3}
+      propertyPath: deathUIPrefab
+      value: 
+      objectReference: {fileID: 6694386357611317501, guid: 7db285bedf2230d4e8df5411b26c2453, type: 3}
+    - target: {fileID: 788162930059392938, guid: b85c7e7543cd837448c12f450cecaad5, type: 3}
+      propertyPath: leftHandController
+      value: 
+      objectReference: {fileID: 1862109657}
+    - target: {fileID: 788162930059392938, guid: b85c7e7543cd837448c12f450cecaad5, type: 3}
+      propertyPath: deathFilterMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 275be5c5b9e7ddf46b95527f0d6eaea6, type: 2}
     - target: {fileID: 809713828476797707, guid: b85c7e7543cd837448c12f450cecaad5, type: 3}
       propertyPath: m_Layer
       value: 7
@@ -6672,6 +6684,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: 7291270082443051129, guid: b85c7e7543cd837448c12f450cecaad5, type: 3}
+      propertyPath: m_Radius
+      value: 0.43
+      objectReference: {fileID: 0}
     - target: {fileID: 7332135564486680177, guid: b85c7e7543cd837448c12f450cecaad5, type: 3}
       propertyPath: m_Layer
       value: 7
@@ -6841,6 +6857,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b85c7e7543cd837448c12f450cecaad5, type: 3}
+--- !u!1 &1862109657 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3697705406963678188, guid: b85c7e7543cd837448c12f450cecaad5, type: 3}
+  m_PrefabInstance: {fileID: 1862109656}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1919369115
 PrefabInstance:
   m_ObjectHideFlags: 0
