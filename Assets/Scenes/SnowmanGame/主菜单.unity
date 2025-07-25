@@ -2241,6 +2241,148 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1738271677}
   m_Mesh: {fileID: 4300000, guid: ef3469e385baa234c830a4f51f3aab8a, type: 3}
+--- !u!1 &1772360581
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1772360582}
+  - component: {fileID: 1772360584}
+  - component: {fileID: 1772360583}
+  m_Layer: 7
+  m_Name: AudioSource
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1772360582
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1772360581}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0.549631, z: -0, w: -0.83540756}
+  m_LocalPosition: {x: -64.248055, y: 3.068, z: -23.897293}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2198805261719963259}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1772360583
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1772360581}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4952faa436343c74ca1b2a6f7769f579, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  snowSound: {fileID: 8300000, guid: 42041733b4bc8784caad47a36e08bc06, type: 3}
+--- !u!82 &1772360584
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1772360581}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!114 &32957074017111165
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6973,6 +7115,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   initialHealth: 100
   healthBarPrefab: {fileID: 5429467087999930779, guid: 33b32447657d9074d965765de8ecfbf6, type: 3}
+  explosionParticlePrefab: {fileID: 0}
+  deathSound: {fileID: 0}
 --- !u!4 &1339431187759302840
 Transform:
   m_ObjectHideFlags: 0
@@ -8527,6 +8671,7 @@ Transform:
   m_Children:
   - {fileID: 672407634409095942}
   - {fileID: 7617585822529793105}
+  - {fileID: 1772360582}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 130, z: 0}
 --- !u!114 &2201622928149224935
@@ -11642,6 +11787,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fixedHealthBarPrefab: {fileID: 1698018954499368992, guid: cc45fbf834a226644880f94b38984cda, type: 3}
+  deathUIPrefab: {fileID: 0}
+  deathFilterMaterial: {fileID: 0}
+  deathTimeScale: 0.3
+  leftHandController: {fileID: 0}
 --- !u!114 &3536990402637916905
 MonoBehaviour:
   m_ObjectHideFlags: 0

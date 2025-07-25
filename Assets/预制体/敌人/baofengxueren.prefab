@@ -647,7 +647,7 @@ GameObject:
   - component: {fileID: 678344145006008685}
   m_Layer: 0
   m_Name: baofengxueren
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -735,7 +735,7 @@ MonoBehaviour:
   patrolSpeed: 3
   waitTime: 1
   rotationSpeed: 5
-  detectionRange: 10
+  detectionRange: 15
   attackRange: 7
   playerLayer:
     serializedVersion: 2
@@ -765,6 +765,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   initialHealth: 100
   healthBarPrefab: {fileID: 5429467087999930779, guid: 33b32447657d9074d965765de8ecfbf6, type: 3}
+  explosionParticlePrefab: {fileID: 0}
+  deathSound: {fileID: 0}
 --- !u!1 &3513593233254079888
 GameObject:
   m_ObjectHideFlags: 0

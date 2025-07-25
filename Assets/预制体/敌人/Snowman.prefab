@@ -97,7 +97,7 @@ GameObject:
   - component: {fileID: 2414956681519359769}
   m_Layer: 0
   m_Name: Snowman
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -166,7 +166,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   initialHealth: 100
-  healthBarPrefab: {fileID: 0}
+  healthBarPrefab: {fileID: 5429467087999930779, guid: 33b32447657d9074d965765de8ecfbf6, type: 3}
+  explosionParticlePrefab: {fileID: 0}
+  deathSound: {fileID: 0}
 --- !u!136 &2414956681519359769
 CapsuleCollider:
   m_ObjectHideFlags: 0
