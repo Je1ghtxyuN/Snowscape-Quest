@@ -54,7 +54,7 @@ public class EnemyHealth : MonoBehaviour
 
         // 添加并获取音频源组件
         audioSource = gameObject.AddComponent<AudioSource>();
-        audioSource.spatialBlend = 1f; // 3D空间音效
+        audioSource.spatialBlend = 0f; // 2D空间音效
         audioSource.rolloffMode = AudioRolloffMode.Logarithmic;
 
         // 测试用：3秒后开始受到伤害
@@ -92,13 +92,20 @@ public class EnemyHealth : MonoBehaviour
     // 死亡协程（处理动画和销毁）
     private IEnumerator DeathRoutine()
     {
+        // 标记敌人死亡（禁用AI行为）
+        EnemyAI enemyAI = GetComponent<EnemyAI>();
+        if (enemyAI != null)
+        {
+            enemyAI.MarkAsDead();
+        }
+
         // 触发死亡动画
         if (animator != null)
         {
             animator.SetTrigger("die");
             yield return null; // 确保动画触发器生效
 
-            // 直接使用固定1.6秒等待（替代动态获取动画长度）
+            // 直接使用固定1.6秒等待
             yield return new WaitForSeconds(1.6f);
         }
         else

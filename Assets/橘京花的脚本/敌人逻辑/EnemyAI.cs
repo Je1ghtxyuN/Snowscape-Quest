@@ -33,6 +33,7 @@ public class EnemyAI : MonoBehaviour
     private bool isAttacking = false; // 是否在攻击
     private Transform player; // 玩家引用
     private float lastAttackTime; // 上次攻击时间
+    private bool isDead = false; // 死亡状态标志
 
     void Start()
     {
@@ -54,6 +55,9 @@ public class EnemyAI : MonoBehaviour
 
     void Update()
     {
+        // 如果死亡，直接返回不执行任何AI行为
+        if (isDead) return;
+
         // 检测玩家
         DetectPlayer();
 
@@ -68,6 +72,9 @@ public class EnemyAI : MonoBehaviour
     {
         while (true)
         {
+            // 如果死亡，停止巡逻协程
+            if (isDead) yield break;
+
             // 如果不在追逐或攻击状态，执行巡逻
             if (!isChasing && !isAttacking)
             {
@@ -106,6 +113,9 @@ public class EnemyAI : MonoBehaviour
 
     void DetectPlayer()
     {
+        // 如果死亡，不检测玩家
+        if (isDead) return;
+
         // 检测范围内的玩家
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, detectionRange, playerLayer);
 
@@ -153,6 +163,9 @@ public class EnemyAI : MonoBehaviour
 
     void ChasePlayer()
     {
+        // 如果死亡，不追逐玩家
+        if (isDead) return;
+
         if (player != null)
         {
             // 设置行走动画
@@ -166,6 +179,9 @@ public class EnemyAI : MonoBehaviour
 
     IEnumerator AttackPlayer()
     {
+        // 如果死亡，不执行攻击
+        if (isDead) yield break;
+
         if (isAttacking || player == null)
         {
             Debug.Log($"攻击被阻止 - isAttacking:{isAttacking} player:{player != null}");
@@ -271,5 +287,11 @@ public class EnemyAI : MonoBehaviour
 
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, attackRange);
+    }
+
+    // 标记敌人死亡
+    public void MarkAsDead()
+    {
+        isDead = true;
     }
 }
