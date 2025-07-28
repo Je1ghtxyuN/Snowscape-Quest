@@ -64,8 +64,8 @@ public class EnemyHealth : MonoBehaviour
     // 受伤测试
     private void ApplyTestDamage()
     {
-        //TakeDamage(50f);
-        //UnityEngine.Debug.Log("Enemy测试受到伤害");
+        TakeDamage(50f);
+        UnityEngine.Debug.Log("Enemy测试受到伤害");
     }
 
     // 收到伤害的方法
@@ -130,6 +130,8 @@ public class EnemyHealth : MonoBehaviour
         {
             // 在敌人位置播放音效
             audioSource.PlayOneShot(deathSound);
+            // 等待音效播放完毕（PlayOneShot不会阻塞，所以用等待时间）
+            yield return new WaitForSeconds(deathSound.length);
         }
         else
         {

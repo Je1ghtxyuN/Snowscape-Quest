@@ -644,7 +644,7 @@ GameObject:
   - component: {fileID: 4274441988436318663}
   - component: {fileID: 6989399055150312925}
   - component: {fileID: 8417962790284963701}
-  - component: {fileID: 678344145006008685}
+  - component: {fileID: 7069235988385095155}
   m_Layer: 0
   m_Name: baofengxueren
   m_TagString: Enemy
@@ -732,6 +732,10 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   patrolSpeed: 3
   waitTime: 1
   rotationSpeed: 5
@@ -751,7 +755,7 @@ MonoBehaviour:
   walkAnimParam: isWalking
   attackAnimParam: Attack
   dieAnimParam: die
---- !u!114 &678344145006008685
+--- !u!114 &7069235988385095155
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -765,8 +769,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   initialHealth: 100
   healthBarPrefab: {fileID: 5429467087999930779, guid: 33b32447657d9074d965765de8ecfbf6, type: 3}
-  explosionParticlePrefab: {fileID: 0}
-  deathSound: {fileID: 0}
+  explosionParticlePrefab: {fileID: 8054298197717898720, guid: a734dcf9f4c05214a81f6eb9aeebbb38, type: 3}
+  deathSound: {fileID: 8300000, guid: 1409c98375f652442ba139f1101e1d3d, type: 3}
 --- !u!1 &3513593233254079888
 GameObject:
   m_ObjectHideFlags: 0
