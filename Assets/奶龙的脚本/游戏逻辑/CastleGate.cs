@@ -71,7 +71,7 @@ public class CastleGate : MonoBehaviour
             yield return new WaitForSeconds(openSound.length);
         }
 
-        // 可选：禁用触发器防止重复触发
+        // 禁用触发器防止重复触发
         triggerCollider.enabled = false;
     }
 }
