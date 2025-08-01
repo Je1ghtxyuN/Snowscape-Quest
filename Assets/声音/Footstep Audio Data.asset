@@ -41,9 +41,19 @@ MonoBehaviour:
     Delay: 0.5
   - Tag: rock
     AudioClips:
-    - {fileID: 8300000, guid: f375287431338db43bb2e1d7be947a45, type: 3}
-    - {fileID: 8300000, guid: 93c0a665050c2b040940f960be62c299, type: 3}
-    Delay: 0.5
+    - {fileID: 8300000, guid: f374e4bb0a72e1e4998b7c00e375c793, type: 3}
+    - {fileID: 8300000, guid: cfd281a9e64c1264b9f2b42fb9096a9e, type: 3}
+    - {fileID: 8300000, guid: 4bfe0f71ce2f2aa459fe0c0e9640762c, type: 3}
+    - {fileID: 8300000, guid: 03da0528f7ce83849b2b517a14f35226, type: 3}
+    - {fileID: 8300000, guid: 0e3bc1a5cab232541a630796f716956a, type: 3}
+    - {fileID: 8300000, guid: 2e100a08b43f225439751a5649eb08c6, type: 3}
+    - {fileID: 8300000, guid: a2f06c829e62c9d49b6dc43e02376f2b, type: 3}
+    - {fileID: 8300000, guid: 261aaa6d499b36540b86ff9e9ca9d79d, type: 3}
+    - {fileID: 8300000, guid: be00c245d1162564380e0441ab3367ba, type: 3}
+    - {fileID: 8300000, guid: b632dbfd31dbbe1479f67126392d2221, type: 3}
+    - {fileID: 8300000, guid: 77b0958831ad0c449bf6166b83729680, type: 3}
+    - {fileID: 8300000, guid: 083f3c2f1983dd8419a9336eef471567, type: 3}
+    Delay: 0.3
   - Tag: wood
     AudioClips:
     - {fileID: 8300000, guid: a419eb06472c83845b41b59bc20f0197, type: 3}

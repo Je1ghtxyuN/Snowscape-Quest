@@ -4,7 +4,7 @@ using UnityEngine;
 public class FootstepAudioPlayer : MonoBehaviour
 {
     [SerializeField] private FootstepAudioData footstepAudioData;
-    [SerializeField] private float raycastDistance = 0.2f;
+    [SerializeField] private float raycastDistance = 0.02f;
     [SerializeField] private float footstepDistance = 2f; // 新增：移动距离阈值
 
     private AudioSource audioSource;

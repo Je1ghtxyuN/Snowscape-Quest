@@ -117,8 +117,10 @@ public class JumpFix : MonoBehaviour
         Debug.Log("Jump initiated");
 
         // 方法1：直接调用JumpProvider
-        m_JumpProvider.Jump();
-
+        if (IsGrounded())
+        {
+            m_JumpProvider.Jump();
+        }
         // 方法2：强制应用跳跃力（备用方案）
         if (IsGrounded())
         {
