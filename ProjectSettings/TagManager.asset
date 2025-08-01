@@ -9,6 +9,8 @@ TagManager:
   - snow
   - water
   - Snowball
+  - rock
+  - wood
   layers:
   - Default
   - TransparentFX

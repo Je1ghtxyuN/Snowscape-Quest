@@ -64,8 +64,8 @@ public class EnemyHealth : MonoBehaviour
     // 受伤测试
     private void ApplyTestDamage()
     {
-        TakeDamage(50f);
-        UnityEngine.Debug.Log("Enemy测试受到伤害");
+        //TakeDamage(50f);
+        //UnityEngine.Debug.Log("Enemy测试受到伤害");
     }
 
     // 收到伤害的方法

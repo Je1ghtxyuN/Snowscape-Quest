@@ -190,8 +190,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   initialHealth: 100
   healthBarPrefab: {fileID: 5429467087999930779, guid: 33b32447657d9074d965765de8ecfbf6, type: 3}
-  explosionParticlePrefab: {fileID: 0}
-  deathSound: {fileID: 0}
+  explosionParticlePrefab: {fileID: 8054298197717898720, guid: a734dcf9f4c05214a81f6eb9aeebbb38, type: 3}
+  deathSound: {fileID: 8300000, guid: 1409c98375f652442ba139f1101e1d3d, type: 3}
 --- !u!1 &1884917951516994139
 GameObject:
   m_ObjectHideFlags: 0
