@@ -644,7 +644,7 @@ GameObject:
   - component: {fileID: 4274441988436318663}
   - component: {fileID: 6989399055150312925}
   - component: {fileID: 8417962790284963701}
-  - component: {fileID: 7069235988385095155}
+  - component: {fileID: 5985300570024987437}
   m_Layer: 0
   m_Name: baofengxueren
   m_TagString: Enemy
@@ -755,7 +755,7 @@ MonoBehaviour:
   walkAnimParam: isWalking
   attackAnimParam: Attack
   dieAnimParam: die
---- !u!114 &7069235988385095155
+--- !u!114 &5985300570024987437
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -764,7 +764,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3422242025731796399}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa61cd393f009ec40b70a0bfa810fc61, type: 3}
+  m_Script: {fileID: 11500000, guid: 6272e2bc40324174dad5b2abb5ba30fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   initialHealth: 100
