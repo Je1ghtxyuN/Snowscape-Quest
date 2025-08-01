@@ -64,8 +64,8 @@ public class EnemyHealth : MonoBehaviour
     // 受伤测试
     private void ApplyTestDamage()
     {
-        //TakeDamage(50f);
-        //UnityEngine.Debug.Log("Enemy测试受到伤害");
+        TakeDamage(50f);
+        UnityEngine.Debug.Log("Enemy测试受到伤害");
     }
 
     // 收到伤害的方法
@@ -92,55 +92,60 @@ public class EnemyHealth : MonoBehaviour
     // 死亡协程（处理动画和销毁）
     private IEnumerator DeathRoutine()
     {
-        // 标记敌人死亡（禁用AI行为）
-        EnemyAI enemyAI = GetComponent<EnemyAI>();
-        if (enemyAI != null)
+        // 1. 禁用碰撞体（显式判空）
+        Collider collider = GetComponent<Collider>();
+        if (collider != null)
         {
-            enemyAI.MarkAsDead();
+            collider.enabled = false;
         }
 
-        // 触发死亡动画
+        // 2. 触发所有视觉效果（动画/音效/粒子）
         if (animator != null)
-        {
             animator.SetTrigger("die");
-            yield return null; // 确保动画触发器生效
 
-            // 直接使用固定1.6秒等待
-            yield return new WaitForSeconds(1.6f);
-        }
-        else
-        {
-            // 没有动画组件时使用保底等待
-            yield return new WaitForSeconds(0.5f);
-        }
+        if (deathSound != null && audioSource != null)
+            audioSource.PlayOneShot(deathSound);
 
-        // 在敌人位置生成粒子爆炸
+        GameObject explosion = null;
         if (explosionParticlePrefab != null)
         {
-            GameObject explosion = Instantiate(
-                explosionParticlePrefab,
-                transform.position, // 敌人中心点
-                Quaternion.identity
-            );
-            Destroy(explosion, 0.5f); // 粒子播放后自动销毁
+            explosion = Instantiate(explosionParticlePrefab, transform.position, Quaternion.identity);
+            Destroy(explosion, 2f); // 延长粒子生命周期
         }
 
-        // 播放音效
-        if (deathSound != null && audioSource != null)
+        // 3. 立即销毁主物体(保留视觉效果继续播放）
+        if (healthUI != null)
+            Destroy(healthUI.gameObject);
+
+        // 隐藏物体但保留组件运行
+        if (TryGetComponent<Renderer>(out var renderer))
         {
-            // 在敌人位置播放音效
-            audioSource.PlayOneShot(deathSound);
-            // 等待音效播放完毕（PlayOneShot不会阻塞，所以用等待时间）
-            yield return new WaitForSeconds(deathSound.length);
+            renderer.enabled = false;
+        }
+        foreach (Transform child in transform)
+            child.gameObject.SetActive(false);
+
+        // 4. 仅等待动画时长（不等待音效/粒子）
+        if (animator != null)
+        {
+            // 强制动画立即更新
+            animator.Update(0f);
+
+            yield return new WaitUntil(() =>
+                animator.GetCurrentAnimatorStateInfo(0).IsName("DeathState")
+            );
+
+            // 精确等待动画长度
+            yield return new WaitForSeconds(
+                animator.GetCurrentAnimatorStateInfo(0).length
+            );
         }
         else
         {
-            // 如果没有音效，使用保底延迟
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.3f); // 最小等待时间
         }
 
-        // 销毁逻辑
-        if (healthUI != null) Destroy(healthUI.gameObject);
+        // 5. 最终销毁
         Destroy(gameObject);
     }
 

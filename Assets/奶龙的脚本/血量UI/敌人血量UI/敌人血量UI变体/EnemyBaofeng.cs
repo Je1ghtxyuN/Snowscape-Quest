@@ -4,7 +4,7 @@ using System.Diagnostics;
 using UnityEngine;
 
 
-public class EnemyCastle : MonoBehaviour
+public class EnemyBaofeng : MonoBehaviour
 {
     [Header("Health Settings")]
     [SerializeField] private float initialHealth = 100f;
@@ -18,9 +18,6 @@ public class EnemyCastle : MonoBehaviour
     [Header("声音特效")]
     [SerializeField] private AudioClip deathSound; // 音效资源
     private AudioSource audioSource; // 音频源组件
-
-    [Header("死亡后销毁物体")]
-    [SerializeField] private GameObject targetToDestroy;
 
     // 死亡状态
     private bool isDead = false;
@@ -62,7 +59,7 @@ public class EnemyCastle : MonoBehaviour
         audioSource.rolloffMode = AudioRolloffMode.Logarithmic;
 
         // 测试用：3秒后开始受到伤害
-        //InvokeRepeating("ApplyTestDamage", 3f, 1f);
+        InvokeRepeating("ApplyTestDamage", 3f, 1f);
     }
 
     // 受伤测试
@@ -141,14 +138,6 @@ public class EnemyCastle : MonoBehaviour
         {
             // 如果没有音效，使用保底延迟
             yield return new WaitForSeconds(0.5f);
-        }
-
-
-        // 物体销毁
-        if (targetToDestroy != null)
-        {
-            Destroy(targetToDestroy);
-            UnityEngine.Debug.Log($"已销毁物体: {targetToDestroy.name}");
         }
 
         // 销毁逻辑
