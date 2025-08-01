@@ -44,7 +44,7 @@ public class FootstepAudioPlayer : MonoBehaviour
         }
         else
         {
-            currentSurfaceTag = "snow";
+            currentSurfaceTag = "Default";
         }
     }
 
