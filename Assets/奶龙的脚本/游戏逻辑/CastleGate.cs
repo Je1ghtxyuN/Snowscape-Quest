@@ -42,6 +42,8 @@ public class CastleGate : MonoBehaviour
     {
         if (hasOpened) return;
 
+        //UnityEngine.Debug.Log("进入大门触发器");
+
         // 仅玩家触发且场景无敌人
         if (other.CompareTag("Player") && NoEnemiesInScene())
         {

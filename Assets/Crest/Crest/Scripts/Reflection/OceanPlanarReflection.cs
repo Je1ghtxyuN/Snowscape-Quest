@@ -183,6 +183,7 @@ namespace Crest
                 return;
             }
 
+
 #if UNITY_EDITOR
             // Work in edit mode.
             var editorCamera = OceanRenderer.Instance.ViewCamera;

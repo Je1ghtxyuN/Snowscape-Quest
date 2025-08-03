@@ -122,10 +122,10 @@ public class JumpFix : MonoBehaviour
         //    m_JumpProvider.Jump();
         //}
         // 方法2：强制应用跳跃力（备用方案）
-        if (IsGrounded())
-        {
-            StartCoroutine(ApplyForceAfterDelay(0.1f));
-        }
+        //if (IsGrounded())
+        //{
+        //    StartCoroutine(ApplyForceAfterDelay(0.1f));
+        //}
     }
 
     private System.Collections.IEnumerator ApplyForceAfterDelay(float delay)
