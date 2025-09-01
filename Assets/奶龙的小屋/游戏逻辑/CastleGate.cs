@@ -12,6 +12,9 @@ public class CastleGate : MonoBehaviour
     public Transform leftDoor; // 左侧门扇
     public Transform rightDoor; // 右侧门扇
 
+    [Header("开门条件")]
+    public int requiredScore = 10; // 开启大门所需的分数
+
     private Vector3 leftDoorInitialRotation; // 左侧门扇初始旋转
     private Vector3 rightDoorInitialRotation; // 右侧门扇初始旋转
     private Vector3 leftDoorTargetRotation; // 左侧门扇目标旋转
@@ -29,6 +32,20 @@ public class CastleGate : MonoBehaviour
     [Header("触发器设置")]
     public Collider triggerCollider; // 触发器碰撞体
     private bool hasOpened = false; // 防止重复触发
+
+    // 全局分数系统（单例模式）
+    private static ScoreSystem scoreSystemInstance;
+    public static ScoreSystem ScoreSystem
+    {
+        get
+        {
+            if (scoreSystemInstance == null)
+            {
+                scoreSystemInstance = new ScoreSystem();
+            }
+            return scoreSystemInstance;
+        }
+    }
 
     void Start()
     {
@@ -56,11 +73,10 @@ public class CastleGate : MonoBehaviour
         UnityEngine.Debug.Log($"右侧门扇初始旋转: {rightDoorInitialRotation}, 目标旋转: {rightDoorTargetRotation}");
     }
 
-    // 检测敌人是否存在
-    private bool NoEnemiesInScene()
+    // 检测分数是否达标
+    private bool ScoreReached()
     {
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-        return enemies.Length == 0;
+        return ScoreSystem.CurrentScore >= requiredScore;
     }
 
     // 触发器进入检测
@@ -68,10 +84,8 @@ public class CastleGate : MonoBehaviour
     {
         if (hasOpened) return;
 
-        //UnityEngine.Debug.Log("进入大门触发器");
-
-        // 仅玩家触发且场景无敌人
-        if (other.CompareTag("Player") && NoEnemiesInScene())
+        // 仅玩家触发且分数达标
+        if (other.CompareTag("Player") && ScoreReached())
         {
             StartCoroutine(OpenGateSequence());
             UnityEngine.Debug.Log("触发开门");
@@ -135,5 +149,33 @@ public class CastleGate : MonoBehaviour
         // 禁用触发器防止重复触发
         if (triggerCollider != null)
             triggerCollider.enabled = false;
+    }
+}
+
+// 全局分数系统
+public class ScoreSystem
+{
+    private int currentScore = 0;
+
+    public int CurrentScore => currentScore;
+
+    // 增加分数（普通敌人调用）
+    public void AddRegularEnemyScore()
+    {
+        currentScore += 1;
+        UnityEngine.Debug.Log($"普通敌人被击败！当前分数: {currentScore}");
+    }
+
+    // 增加分数（精英敌人调用）
+    public void AddEliteEnemyScore()
+    {
+        currentScore += 2;
+        UnityEngine.Debug.Log($"精英敌人被击败！当前分数: {currentScore}");
+    }
+
+    // 重置分数
+    public void ResetScore()
+    {
+        currentScore = 0;
     }
 }

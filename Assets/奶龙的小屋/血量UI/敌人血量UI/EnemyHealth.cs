@@ -82,6 +82,9 @@ public class EnemyHealth : MonoBehaviour
         if (isDead) return; // 避免重复触发
         isDead = true;
 
+        // 增加分数（普通敌人）
+        CastleGate.ScoreSystem.AddRegularEnemyScore();
+
         // 取消事件订阅防止重复调用
         healthSystem.OnDeath -= Die;
 
