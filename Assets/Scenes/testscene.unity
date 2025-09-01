@@ -238,7 +238,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2047579688976989963, guid: df84605803a93b14790a720e26aa4271, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8030343101913912300, guid: df84605803a93b14790a720e26aa4271, type: 3}
       propertyPath: m_LocalPosition.x
@@ -11596,6 +11596,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: TreasureChest
       objectReference: {fileID: 0}
+    - target: {fileID: 4282803438774872590, guid: f6105d64e30fe0542a1955e11f92e159, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7145746936506300735, guid: f6105d64e30fe0542a1955e11f92e159, type: 3}
       propertyPath: m_LocalPosition.x
       value: 6.456063
@@ -14929,6 +14933,10 @@ PrefabInstance:
     - target: {fileID: 3819237996595539822, guid: f0e472be6ee9b8a49b3fcac64cb20c83, type: 3}
       propertyPath: m_Name
       value: "\u80DC\u5229UI"
+      objectReference: {fileID: 0}
+    - target: {fileID: 3819237996595539822, guid: f0e472be6ee9b8a49b3fcac64cb20c83, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5704080620743769290, guid: f0e472be6ee9b8a49b3fcac64cb20c83, type: 3}
       propertyPath: m_LocalPosition.x

@@ -81,19 +81,5 @@ public class XRUIToggle : MonoBehaviour
         menuAction.action.performed -= ToggleUI;
     }
 
-    // 新增：外部调用的关闭菜单方法（用于"继续游戏"按钮）
-    //public void CloseMenu()
-    //{
-    //    if (isUIVisible)
-    //    {
-    //        isUIVisible = false;
-    //        uiCanvas.SetActive(false);
 
-    //        if (pauseGameWhenOpen)
-    //        {
-    //            Time.timeScale = previousTimeScale;
-    //            AudioListener.pause = false;
-    //        }
-    //    }
-    //}
 }

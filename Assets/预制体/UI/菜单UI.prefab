@@ -2371,7 +2371,7 @@ GameObject:
   - component: {fileID: 6902952386674238662}
   - component: {fileID: 7436128967225842324}
   - component: {fileID: 377101336682872543}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: "\u83DC\u5355UI"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
