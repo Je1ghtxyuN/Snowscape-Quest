@@ -19,6 +19,7 @@ public class ButtonFunction : MonoBehaviour
     public void SwitchScene()
     {
         SceneManager.LoadScene(sceneToSwitch);
+        CastleGate.ScoreSystem.ResetScore(); // 重置分数
     }
 
     public void ExitApplication()
@@ -46,6 +47,8 @@ public class ButtonFunction : MonoBehaviour
 
     public void reLoadScene()
     {
+        Time.timeScale = 1f;
         SceneManager.LoadScene(sceneToSwitch);
+        CastleGate.ScoreSystem.ResetScore(); // 重置分数
     }
 }

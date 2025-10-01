@@ -75,7 +75,7 @@ public class PlayerHealth : MonoBehaviour
         // ÊµÀý»¯ËÀÍöUI
         deathUIInstance = Instantiate(
             deathUIPrefab,
-            vrCamera.transform.position + vrCamera.transform.forward * 1.5f + (-vrCamera.transform.up) * 0.5f,
+            vrCamera.transform.position + vrCamera.transform.forward * 1.5f + (-vrCamera.transform.up) * 1f,
             vrCamera.transform.rotation
         );
 

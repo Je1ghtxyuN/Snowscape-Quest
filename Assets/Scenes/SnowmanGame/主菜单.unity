@@ -13353,6 +13353,22 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -152.8
       objectReference: {fileID: 0}
+    - target: {fileID: 5223861755146589371, guid: fd607d96d2fc9cd4896fde32175821a0, type: 3}
+      propertyPath: m_text
+      value: "\u96EA\u6751"
+      objectReference: {fileID: 0}
+    - target: {fileID: 5223861755146589371, guid: fd607d96d2fc9cd4896fde32175821a0, type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: c6b7efe6983bdab46bafa00ce1ccb692, type: 2}
+    - target: {fileID: 5223861755146589371, guid: fd607d96d2fc9cd4896fde32175821a0, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: -1292245563074996989, guid: c6b7efe6983bdab46bafa00ce1ccb692, type: 2}
+    - target: {fileID: 5223861755146589371, guid: fd607d96d2fc9cd4896fde32175821a0, type: 3}
+      propertyPath: m_hasFontAssetChanged
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5636638653987966072, guid: fd607d96d2fc9cd4896fde32175821a0, type: 3}
       propertyPath: m_Name
       value: "\u7248\u672C\u53F7"

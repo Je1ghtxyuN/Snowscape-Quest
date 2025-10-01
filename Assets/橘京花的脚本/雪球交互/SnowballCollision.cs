@@ -29,9 +29,15 @@ public class SnowballCollision : MonoBehaviour
         {
             Debug.Log("»÷ÖÐµÐÈË£¡");
             EnemyHealth enemyScript = collision.gameObject.GetComponent<EnemyHealth>();
+            EnemyBaofeng enemyBaofengScript = collision.gameObject.GetComponent<EnemyBaofeng>();
             if (enemyScript != null)
             {
                 enemyScript.TakeDamage(20f);
+
+            }
+            else if (enemyBaofengScript != null)
+            {
+                enemyBaofengScript.TakeDamage(20f);
             }
             else
             {

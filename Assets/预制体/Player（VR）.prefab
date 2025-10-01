@@ -438,6 +438,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8298045291338814966, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7903517893175553269}
+    - targetCorrespondingSourceObject: {fileID: 8298045291338814966, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 799525761477054111}
     - targetCorrespondingSourceObject: {fileID: 7277802327414017194, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
       insertIndex: -1
       addedObject: {fileID: 707638238354185743}
@@ -688,6 +691,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   waterEnterSound: {fileID: 8300000, guid: 419677b0050facb4aab1d86121b0e764, type: 3}
   playOnlyOnce: 0
+--- !u!114 &799525761477054111
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2632219754002825934}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c43c8d95f323c924dbdc4d033c46879d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scoreUIPrefab: {fileID: 4862823480734786970, guid: e01a3e9647003f74a8a402f46620a593, type: 3}
+  uiOffset: {x: 0, y: 0.3, z: 0}
+  uiScale: 0.002
 --- !u!1 &3697705405439712146 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7277802327414017194, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
