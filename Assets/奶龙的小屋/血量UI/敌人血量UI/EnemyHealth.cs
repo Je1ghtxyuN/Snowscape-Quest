@@ -9,15 +9,15 @@ public class EnemyHealth : MonoBehaviour
     [SerializeField] private float initialHealth = 100f;
     // 血条UI预制体
     [SerializeField] private GameObject healthBarPrefab;
-    
+
     [Header("死亡特效")]
     // 粒子预制体
-    [SerializeField] private GameObject explosionParticlePrefab; 
+    [SerializeField] private GameObject explosionParticlePrefab;
 
     [Header("声音特效")]
     [SerializeField] private AudioClip deathSound; // 音效资源
     private AudioSource audioSource; // 音频源组件
-   
+
     // 死亡状态
     private bool isDead = false;
 

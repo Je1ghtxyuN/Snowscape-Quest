@@ -83,6 +83,9 @@ public class EnemyBaofeng : MonoBehaviour
         if (isDead) return; // 避免重复触发
         isDead = true;
 
+        // 增加分数（精英敌人）
+        CastleGate.ScoreSystem.AddEliteEnemyScore();
+
         // 取消事件订阅防止重复调用
         healthSystem.OnDeath -= Die;
 
