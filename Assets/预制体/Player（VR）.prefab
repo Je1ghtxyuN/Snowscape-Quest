@@ -878,4 +878,5 @@ MonoBehaviour:
   gripAction: {fileID: 4324797343224664871, guid: 761bf6a792a0c114fa0953a9b458c7e4, type: 3}
   spawnOffset: 0.1
   throwForceMultiplier: 1.5
-  minThrowSpeed: 2
+  gravityScale: 0.5
+  velocitySmoothingFrames: 10

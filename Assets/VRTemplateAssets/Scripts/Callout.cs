@@ -52,6 +52,9 @@ namespace Unity.VRTemplate
 
         public void GazeHoverStart()
         {
+            // 检查游戏对象是否激活
+            if (!isActiveAndEnabled) return;
+
             m_Gazing = true;
             if (m_StartCo != null)
                 StopCoroutine(m_StartCo);
@@ -62,6 +65,9 @@ namespace Unity.VRTemplate
 
         public void GazeHoverEnd()
         {
+            // 检查游戏对象是否激活
+            if (!isActiveAndEnabled) return;
+
             m_Gazing = false;
             m_EndCo = StartCoroutine(EndDelay());
         }
@@ -69,20 +75,25 @@ namespace Unity.VRTemplate
         IEnumerator StartDelay()
         {
             yield return new WaitForSeconds(m_DwellTime);
-            if (m_Gazing)
+
+            // 再次检查，防止在等待期间对象被禁用
+            if (m_Gazing && isActiveAndEnabled)
                 TurnOnStuff();
         }
 
         IEnumerator EndDelay()
         {
-            if (!m_Gazing)
-                TurnOffStuff();
+            // 等待一帧，确保状态稳定
             yield return null;
+
+            // 检查对象是否仍然激活
+            if (!m_Gazing && isActiveAndEnabled)
+                TurnOffStuff();
         }
 
         void TurnOnStuff()
         {
-            if (m_LazyTooltip != null)
+            if (m_LazyTooltip != null && m_LazyTooltip.gameObject != null)
                 m_LazyTooltip.gameObject.SetActive(true);
             if (m_Curve != null)
                 m_Curve.SetActive(true);
@@ -90,10 +101,27 @@ namespace Unity.VRTemplate
 
         void TurnOffStuff()
         {
-            if (m_LazyTooltip != null)
+            if (m_LazyTooltip != null && m_LazyTooltip.gameObject != null)
                 m_LazyTooltip.gameObject.SetActive(false);
             if (m_Curve != null)
                 m_Curve.SetActive(false);
+        }
+
+        // 添加OnDisable方法，确保对象禁用时清理状态
+        private void OnDisable()
+        {
+            // 停止所有协程
+            if (m_StartCo != null)
+                StopCoroutine(m_StartCo);
+            if (m_EndCo != null)
+                StopCoroutine(m_EndCo);
+
+            m_StartCo = null;
+            m_EndCo = null;
+
+            // 如果对象被禁用，确保关闭相关UI
+            if (!m_Gazing)
+                TurnOffStuff();
         }
     }
 }
