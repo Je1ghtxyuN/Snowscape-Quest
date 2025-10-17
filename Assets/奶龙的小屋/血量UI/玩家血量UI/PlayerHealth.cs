@@ -68,7 +68,14 @@ public class PlayerHealth : MonoBehaviour
         healthSystem.OnDeath -= Die;
     }
 
-   
+    public void Heal(float amount)
+    {
+        if (!isDead)
+        {
+            // 假设Health类有Heal方法，如果没有需要添加
+            healthSystem.Heal(amount);
+        }
+    }
 
     private void ShowDeathUI()
     {

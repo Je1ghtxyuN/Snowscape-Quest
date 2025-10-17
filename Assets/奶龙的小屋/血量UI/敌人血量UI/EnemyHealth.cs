@@ -18,6 +18,10 @@ public class EnemyHealth : MonoBehaviour
     [SerializeField] private AudioClip deathSound; // 音效资源
     private AudioSource audioSource; // 音频源组件
 
+    [Header("冰晶掉落")]
+    [SerializeField] private GameObject iceCrystalPrefab; // 冰晶预制体
+    [SerializeField] private float crystalDropChance = 0.7f; // 掉落概率
+
     // 死亡状态
     private bool isDead = false;
 
@@ -87,8 +91,42 @@ public class EnemyHealth : MonoBehaviour
 
         CastleGate.ScoreSystem.AddRegularEnemyScore();
 
+        // 掉落冰晶
+        if (Random.value <= crystalDropChance && iceCrystalPrefab != null)
+        {
+            DropIceCrystal();
+        }
+
         // 死亡逻辑
         StartCoroutine(DeathRoutine());
+    }
+
+    private void DropIceCrystal()
+    {
+        Vector3 dropPosition = transform.position + Vector3.up * 1f;
+        GameObject crystal = Instantiate(iceCrystalPrefab, dropPosition, Quaternion.identity);
+
+        // 添加漂浮效果
+        StartCoroutine(FloatingCrystal(crystal));
+    }
+
+    // 修改参数类型
+    private IEnumerator FloatingCrystal(GameObject crystal)
+    {
+        // 方法体保持不变
+        float floatHeight = 0.5f;
+        float floatSpeed = 2f;
+        Vector3 startPos = crystal.transform.position;
+
+        float timer = 0f;
+        while (timer < 3f)
+        {
+            crystal.transform.position = startPos + Vector3.up * Mathf.Sin(timer * floatSpeed) * floatHeight;
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        Destroy(crystal);
     }
 
     // 死亡协程（处理动画和销毁）

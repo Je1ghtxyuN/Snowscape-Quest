@@ -35,11 +35,10 @@ public class Health
     }
 
     //增加血量
-    public void Heal(float healAmount)
+    public void Heal(float amount)
     {
-        currentHealth = Mathf.Min(currentHealth + healAmount, maxHealth);
-
-        //触发血量变化事件
+        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+        // 修改为无参调用，保持事件签名一致
         OnHealthChanged?.Invoke();
     }
 
