@@ -105,6 +105,10 @@ namespace Crest
 
         private void Update()
         {
+
+            // 添加安全检查，防止除以零
+            if (s_Count <= 0)
+                return;
             // Time slice update to distribute the load.
             if (_index != Time.frameCount % s_Count)
             {
