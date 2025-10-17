@@ -580,6 +580,12 @@ MonoBehaviour:
     pelvisTargetRight: {x: 0, y: 0, z: 0}
     pelvisPositionWeight: 0
     pelvisRotationWeight: 0
+  calibrateAction: {fileID: 0}
+  calibrateWithDataAction: {fileID: 0}
+  recalibrateScaleAction: {fileID: 0}
+  calibrateKey: 1
+  calibrateWithDataKey: 20
+  recalibrateScaleKey: 32
 --- !u!4 &508605848860840072 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8496879035693090889, guid: 0fdd3627d07d2144493b6773cbbf4655, type: 3}
@@ -987,6 +993,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8298045291338814966, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
       insertIndex: -1
       addedObject: {fileID: 799525761477054111}
+    - targetCorrespondingSourceObject: {fileID: 8298045291338814966, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4981125943194325849}
     - targetCorrespondingSourceObject: {fileID: 7277802327414017194, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
       insertIndex: -1
       addedObject: {fileID: 707638238354185743}
@@ -1252,6 +1261,24 @@ MonoBehaviour:
   scoreUIPrefab: {fileID: 4862823480734786970, guid: e01a3e9647003f74a8a402f46620a593, type: 3}
   uiOffset: {x: 0, y: 0.3, z: 0}
   uiScale: 0.002
+--- !u!114 &4981125943194325849
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2632219754002825934}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb3f37c6b75ae704496bb38ad74fd585, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  iceCrystalNormalMap: {fileID: 0}
+  iceCrystalParticles: {fileID: 0}
+  collectSound: {fileID: 0}
+  healAmount: 20
+  effectDuration: 5
+  skinPartName: Skin
 --- !u!4 &3697705405439712145 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7277802327414017193, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
