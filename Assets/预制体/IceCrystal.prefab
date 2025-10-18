@@ -98,9 +98,9 @@ SphereCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Radius: 0.0035265957
   m_Center: {x: -0.00028100616, y: -0.00944849, z: 0.0017460498}
@@ -118,6 +118,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attractRange: 3
   attractSpeed: 5
+  floatHeight: 1
+  floatSpeed: 4
+  minHeight: 3
 --- !u!114 &-4311374521737224858
 MonoBehaviour:
   m_ObjectHideFlags: 0

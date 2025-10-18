@@ -772,7 +772,7 @@ MonoBehaviour:
   explosionParticlePrefab: {fileID: 0}
   deathSound: {fileID: 8300000, guid: 1409c98375f652442ba139f1101e1d3d, type: 3}
   iceCrystalPrefab: {fileID: 7234290121564543664, guid: 22e7eb07d2a85fb4caf01ead88f5b8f9, type: 3}
-  crystalDropChance: 0.7
+  crystalDropChance: 1
 --- !u!1 &3513593233254079888
 GameObject:
   m_ObjectHideFlags: 0
