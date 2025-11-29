@@ -1,200 +1,303 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
 
+[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(Collider))]
 public class AdvancedEnemyAI : MonoBehaviour
 {
-    [Header("Ñ²ÂßÉèÖÃ")]
-    public float patrolRadius = 3f;
-    public float patrolSpeed = 3f;
-    public float waitTime = 1f;
-    public float rotationSpeed = 5f;
+    [Header("ç§»åŠ¨é€Ÿåº¦è®¾ç½®")]
+    public float patrolSpeed = 2f; // å·¡é€»æ…¢ä¸€ç‚¹
+    public float chaseSpeed = 5f;  // â­ æ–°å¢ï¼šè¿½é€å¿«ä¸€ç‚¹
+    public float rotationSpeed = 15f; // è½¬å‘é€Ÿåº¦
 
-    [Header("Íæ¼Ò¼ì²â")]
+    [Header("å·¡é€»è®¾ç½® (éšæœºæ¸¸è¡)")]
+    public float patrolRadius = 10f;
+    public float waitTime = 2f;
+
+    [Header("é˜²å¡æ­»è®¾ç½®")]
+    public float stuckCheckInterval = 0.5f;
+    public float minMoveDistance = 0.1f;
+    public float changeDirectionCooldown = 1.0f;
+
+    [Header("ç©å®¶æ£€æµ‹")]
     public float detectionRange = 10f;
     public float attackRange = 7f;
+    public float losePlayerRange = 25f;
+    [Tooltip("å¤±å»è§†çº¿åçš„è®°å¿†æ—¶é—´")]
+    public float memoryDuration = 3f;
     public LayerMask playerLayer;
     public LayerMask obstacleLayer;
 
-    [Header("¹¥»÷ÉèÖÃ")]
+    [Header("æ”»å‡»è®¾ç½®")]
     public GameObject snowballPrefab;
     public Transform firePoint;
     public float attackCooldown = 2f;
-    public float projectileSpeed = 10f;
+    public float launchAngle = 25f;
 
-    [Header("¶¯»­")]
+    [Header("åŠ¨ç”»")]
     public Animator animator;
     public string walkAnimParam = "isWalking";
     public string attackAnimParam = "Attack";
     public string dieAnimParam = "die";
 
-    // Ñ²ÂßµãÏà¹Ø
-    private List<Vector3> patrolPoints = new List<Vector3>();
-    private int currentPatrolIndex = 0;
-    private bool isWaiting = false;
-
-    // ×´Ì¬±êÖ¾
+    // çŠ¶æ€æ ‡å¿—
     private bool isChasing = false;
     private bool isAttacking = false;
     public bool isDead = false;
+    private bool isWaiting = false;
 
-    // ÒıÓÃ
+    // å†…éƒ¨å˜é‡
     private Transform player;
     private float lastAttackTime;
+    private float lastSawPlayerTime;
+    private Vector3 spawnPosition;
+    private Vector3 currentPatrolTarget;
+
+    // å¼•ç”¨
     private AdvancedGameAreaManager areaManager;
+    private Rigidbody rb;
+    private Collider myCollider;
+
+    // é˜²å¡æ­»å˜é‡
+    private Vector3 lastStuckCheckPos;
+    private float nextStuckCheckTime;
+    private float lastChangeDirectionTime;
 
     void Start()
     {
-        // ³õÊ¼»¯×é¼ş
-        if (animator == null)
-            animator = GetComponent<Animator>();
+        rb = GetComponent<Rigidbody>();
+        myCollider = GetComponent<Collider>();
+
+        rb.isKinematic = false;
+        rb.useGravity = true;
+        rb.constraints = RigidbodyConstraints.FreezeRotation;
+
+        if (animator == null) animator = GetComponent<Animator>();
 
         areaManager = FindObjectOfType<AdvancedGameAreaManager>();
-        if (areaManager == null)
+
+        spawnPosition = transform.position;
+
+        lastStuckCheckPos = rb.position;
+        nextStuckCheckTime = Time.time + stuckCheckInterval;
+
+        StartCoroutine(RandomPatrolRoutine());
+    }
+
+    void FixedUpdate()
+    {
+        if (isDead) return;
+
+        // 1. æ ¸å¿ƒæ£€æµ‹é€»è¾‘
+        DetectPlayerLogic();
+
+        // 2. æ”»å‡»æ—¶åœæ­¢ç‰©ç†ç§»åŠ¨
+        if (isAttacking)
         {
-            Debug.LogError("Î´ÕÒµ½AdvancedGameAreaManager£¡");
+            rb.velocity = new Vector3(0, rb.velocity.y, 0);
             return;
         }
 
-        // Éú³ÉÑ²Âßµã
-        GeneratePatrolPoints();
+        // 3. â­ è¿½é€ç§»åŠ¨é€»è¾‘ (ç§»åˆ°äº† FixedUpdate ä»¥ä¿è¯é€Ÿåº¦ç¨³å®š)
+        if (isChasing && player != null)
+        {
+            // ä½¿ç”¨ chaseSpeed
+            MoveTowardsTarget(player.position, chaseSpeed);
+        }
 
-        // ¿ªÊ¼Ñ²Âß
-        StartCoroutine(PatrolRoutine());
+        // 4. é˜²å¡æ­» (åªåœ¨å·¡é€»æ—¶æ£€æµ‹ï¼Œè¿½é€æ—¶ä¸å¹²æ‰°)
+        if (!isChasing && !isWaiting)
+        {
+            CheckIfStuck();
+        }
     }
 
     void Update()
     {
         if (isDead) return;
 
-        DetectPlayer();
+        // çŠ¶æ€ä¼˜å…ˆçº§ï¼šæ”»å‡» > è¿½é€
+        // Update ä¸­åªå¤„ç†ã€è½¬å‘ã€‘(FaceTarget)ï¼Œä¿è¯ç”»é¢æµç•…ï¼Œä¸å¤„ç†ä½ç§»
 
+        // 1. æ”»å‡»çŠ¶æ€
+        if (isAttacking)
+        {
+            if (player != null) FaceTarget(player.position);
+            return;
+        }
+
+        // 2. è¿½é€çŠ¶æ€
         if (isChasing && player != null)
         {
             FaceTarget(player.position);
-        }
-    }
-
-    // Éú³É»ùÓÚµ±Ç°Î»ÖÃµÄÑ²Âßµã
-    private void GeneratePatrolPoints()
-    {
-        patrolPoints.Clear();
-
-        // ÒÔµ±Ç°Î»ÖÃÎªÖĞĞÄÉú³ÉÈı½ÇĞÎÑ²Âßµã
-        for (int i = 0; i < 3; i++)
-        {
-            float angle = i * 120f * Mathf.Deg2Rad;
-
-            Vector3 point = transform.position + new Vector3(
-                Mathf.Cos(angle) * patrolRadius,
-                0,
-                Mathf.Sin(angle) * patrolRadius
-            );
-
-            // È·±£Ñ²ÂßµãÔÚÓÎÏ·ÇøÓòÄÚ
-            if (areaManager != null)
-            {
-                point = areaManager.ClampPointToNearestArea(point);
-            }
-
-            patrolPoints.Add(point);
+            // æ³¨æ„ï¼šMoveTowardsTarget å·²ç»ç§»åˆ°äº† FixedUpdate
         }
 
-        Debug.Log($"ÎªÑ©ÈËÉú³É {patrolPoints.Count} ¸öÑ²Âßµã");
+        // 3. å·¡é€»çŠ¶æ€å®Œå…¨ç”±åç¨‹æ§åˆ¶
     }
 
-    IEnumerator PatrolRoutine()
-    {
-        while (true)
-        {
-            if (isDead) yield break;
-
-            if (!isChasing && !isAttacking && patrolPoints.Count > 0)
-            {
-                Vector3 targetPos = patrolPoints[currentPatrolIndex];
-
-                if (Vector3.Distance(transform.position, targetPos) > 0.1f)
-                {
-                    if (animator != null)
-                        animator.SetBool(walkAnimParam, true);
-
-                    FaceTarget(targetPos);
-                    transform.position = Vector3.MoveTowards(transform.position, targetPos, patrolSpeed * Time.deltaTime);
-                }
-                else
-                {
-                    if (animator != null)
-                        animator.SetBool(walkAnimParam, false);
-
-                    if (!isWaiting)
-                    {
-                        isWaiting = true;
-                        yield return new WaitForSeconds(waitTime);
-                        isWaiting = false;
-
-                        currentPatrolIndex = (currentPatrolIndex + 1) % patrolPoints.Count;
-                    }
-                }
-            }
-            yield return null;
-        }
-    }
-
-    void DetectPlayer()
+    // --------------------------------------------------------------------------------
+    // ğŸ” æ™ºèƒ½æ£€æµ‹
+    // --------------------------------------------------------------------------------
+    void DetectPlayerLogic()
     {
         if (isDead) return;
 
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, detectionRange, playerLayer);
-
-        if (hitColliders.Length > 0)
+        if (!isChasing || player == null)
         {
-            player = hitColliders[0].transform;
-            Vector3 directionToPlayer = (player.position - transform.position).normalized;
-            float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-
-            if (!Physics.Raycast(transform.position, directionToPlayer, distanceToPlayer, obstacleLayer))
+            Collider[] hitColliders = Physics.OverlapSphere(transform.position, detectionRange, playerLayer);
+            if (hitColliders.Length > 0)
             {
-                isChasing = true;
-
-                if (distanceToPlayer <= attackRange)
+                Transform potentialTarget = hitColliders[0].transform;
+                if (CheckLineOfSight(potentialTarget))
                 {
-                    if (Time.time >= lastAttackTime + attackCooldown)
-                    {
-                        StartCoroutine(AttackPlayer());
-                    }
+                    StartChasing(potentialTarget);
                 }
-                else
-                {
-                    ChasePlayer();
-                }
-            }
-            else
-            {
-                isChasing = false;
             }
         }
         else
         {
-            isChasing = false;
-            player = null;
+            float dist = Vector3.Distance(transform.position, player.position);
+            bool canSee = CheckLineOfSight(player);
+
+            if (canSee) lastSawPlayerTime = Time.time;
+
+            bool tooFar = dist > losePlayerRange;
+            bool memoryExpired = !canSee && (Time.time > lastSawPlayerTime + memoryDuration);
+
+            if (tooFar || memoryExpired)
+            {
+                StopChasing();
+            }
+            else
+            {
+                if (dist <= attackRange && canSee)
+                {
+                    if (Time.time >= lastAttackTime + attackCooldown)
+                        StartCoroutine(AttackPlayer());
+                }
+            }
         }
     }
 
-    void ChasePlayer()
+    void StartChasing(Transform target)
     {
-        if (isDead || player == null) return;
+        player = target;
+        isChasing = true;
+        isWaiting = false;
+        lastSawPlayerTime = Time.time;
+        // æ‰“æ–­å·¡é€»åç¨‹çš„ç­‰å¾…ï¼Œé˜²æ­¢é€»è¾‘å†²çª
+        StopCoroutine("RandomPatrolRoutine");
+        StartCoroutine(RandomPatrolRoutine());
+    }
 
-        if (animator != null)
-            animator.SetBool(walkAnimParam, true);
+    void StopChasing()
+    {
+        isChasing = false;
+        player = null;
+        isWaiting = false;
+    }
 
-        // ×·ÖğÊ±È·±£²»Àë¿ªÓÎÏ·ÇøÓò
-        Vector3 targetPosition = player.position;
+    bool CheckLineOfSight(Transform target)
+    {
+        Vector3 direction = (target.position - transform.position).normalized;
+        float distance = Vector3.Distance(transform.position, target.position);
+        return !Physics.Raycast(transform.position, direction, distance, obstacleLayer);
+    }
+
+    // --------------------------------------------------------------------------------
+    // ğŸ² éšæœºå·¡é€»
+    // --------------------------------------------------------------------------------
+    IEnumerator RandomPatrolRoutine()
+    {
+        WaitForFixedUpdate waitFixed = new WaitForFixedUpdate();
+        SetNewRandomPatrolTarget();
+
+        while (true)
+        {
+            if (isDead) yield break;
+
+            // åªæœ‰åœ¨ã€å®Œå…¨é—²ç½®ã€‘æ—¶æ‰æ‰§è¡Œå·¡é€»ç§»åŠ¨
+            if (!isChasing && !isAttacking)
+            {
+                float dist = Vector3.Distance(new Vector3(transform.position.x, 0, transform.position.z),
+                                              new Vector3(currentPatrolTarget.x, 0, currentPatrolTarget.z));
+
+                if (dist > 0.5f)
+                {
+                    FaceTarget(currentPatrolTarget);
+                    // â­ è¿™é‡Œä½¿ç”¨ patrolSpeed
+                    MoveTowardsTarget(currentPatrolTarget, patrolSpeed);
+                }
+                else
+                {
+                    if (animator != null) animator.SetBool(walkAnimParam, false);
+
+                    if (!isWaiting)
+                    {
+                        isWaiting = true;
+                        float timer = 0f;
+                        while (timer < waitTime && isWaiting)
+                        {
+                            if (isChasing || isAttacking) { isWaiting = false; break; }
+                            timer += Time.deltaTime;
+                            yield return null;
+                        }
+
+                        if (isWaiting)
+                        {
+                            isWaiting = false;
+                            SetNewRandomPatrolTarget();
+                        }
+                    }
+                }
+            }
+            yield return waitFixed;
+        }
+    }
+
+    void SetNewRandomPatrolTarget()
+    {
+        Vector2 randomCircle = Random.insideUnitCircle * patrolRadius;
+        Vector3 potentialPos = spawnPosition + new Vector3(randomCircle.x, 0, randomCircle.y);
+
         if (areaManager != null)
         {
-            targetPosition = areaManager.ClampPointToNearestArea(targetPosition);
+            potentialPos = areaManager.ClampPointToNearestArea(potentialPos);
+        }
+        currentPatrolTarget = potentialPos;
+    }
+
+    void SwitchPatrolPoint(string reason)
+    {
+        if (Time.time < lastChangeDirectionTime + changeDirectionCooldown) return;
+
+        SetNewRandomPatrolTarget();
+        isWaiting = false;
+
+        lastChangeDirectionTime = Time.time;
+        lastStuckCheckPos = rb.position;
+        nextStuckCheckTime = Time.time + stuckCheckInterval;
+    }
+
+    // --------------------------------------------------------------------------------
+    // ç§»åŠ¨ä¸æ”»å‡»
+    // --------------------------------------------------------------------------------
+
+    // â­ ä¿®æ”¹ï¼šå¢åŠ äº† currentSpeed å‚æ•°ï¼Œå…è®¸ä¼ å…¥ patrolSpeed æˆ– chaseSpeed
+    private void MoveTowardsTarget(Vector3 targetPos, float currentSpeed)
+    {
+        // è¿½é€æ—¶ä¸é™åˆ¶è¾¹ç•Œ
+        if (!isChasing && areaManager != null)
+        {
+            targetPos = areaManager.ClampPointToNearestArea(targetPos);
         }
 
-        transform.position = Vector3.MoveTowards(transform.position, targetPosition, patrolSpeed * Time.deltaTime);
+        if (animator != null) animator.SetBool(walkAnimParam, true);
+
+        // ä½¿ç”¨ä¼ å…¥çš„ speed
+        Vector3 newPos = Vector3.MoveTowards(rb.position, targetPos, currentSpeed * Time.fixedDeltaTime);
+        rb.MovePosition(newPos);
     }
 
     IEnumerator AttackPlayer()
@@ -204,53 +307,83 @@ public class AdvancedEnemyAI : MonoBehaviour
         isAttacking = true;
         lastAttackTime = Time.time;
 
-        Debug.Log("¿ªÊ¼¹¥»÷");
+        if (animator != null) animator.SetBool(walkAnimParam, false);
+        if (animator != null) animator.Play(attackAnimParam, 0, 0f);
 
-        if (animator != null)
+        yield return new WaitForSeconds(0.3f);
+
+        if (player != null) FaceTarget(player.position);
+
+        if (snowballPrefab != null && firePoint != null && player != null)
         {
-            animator.ResetTrigger(attackAnimParam);
-            animator.SetTrigger(attackAnimParam);
-        }
+            GameObject snowball = Instantiate(snowballPrefab, firePoint.position, Quaternion.identity);
 
-        float animationLeadTime = 0.3f;
-        yield return new WaitForSeconds(animationLeadTime);
+            Collider snowballCollider = snowball.GetComponent<Collider>();
+            if (snowballCollider != null && myCollider != null)
+                Physics.IgnoreCollision(snowballCollider, myCollider);
 
-        // ·¢ÉäÑ©Çò
-        if (snowballPrefab != null && firePoint != null)
-        {
-            try
+            Rigidbody snowballRb = snowball.GetComponent<Rigidbody>();
+            if (snowballRb != null)
             {
-                GameObject snowball = Instantiate(snowballPrefab, firePoint.position, Quaternion.identity);
-                Rigidbody rb = snowball.GetComponent<Rigidbody>();
+                Vector3 aimTarget = player.position + Vector3.up * 1.0f;
+                Vector3 finalVelocity = CalculateProjectileVelocity(aimTarget, firePoint.position, launchAngle);
 
-                if (rb != null)
-                {
-                    Vector3 horizontalDirection = (player.position - firePoint.position).normalized;
-                    horizontalDirection.y = 0;
-
-                    float launchAngle = 20f;
-                    float radians = launchAngle * Mathf.Deg2Rad;
-
-                    Vector3 launchDirection = new Vector3(
-                        horizontalDirection.x * Mathf.Cos(radians),
-                        Mathf.Sin(radians),
-                        horizontalDirection.z * Mathf.Cos(radians)
-                    ).normalized;
-
-                    rb.velocity = launchDirection * projectileSpeed;
-                    Destroy(snowball, 5f);
-                }
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"Ñ©Çò·¢ÉäÊ§°Ü: {e.Message}");
+                snowballRb.velocity = finalVelocity;
+                snowballRb.angularVelocity = Random.insideUnitSphere * 10f;
+                Destroy(snowball, 5f);
             }
         }
 
-        float remainingCooldown = Mathf.Max(0, attackCooldown - animationLeadTime);
-        yield return new WaitForSeconds(remainingCooldown);
-
+        yield return new WaitForSeconds(attackCooldown - 0.3f);
         isAttacking = false;
+    }
+
+    Vector3 CalculateProjectileVelocity(Vector3 target, Vector3 origin, float angle)
+    {
+        Vector3 dir = target - origin;
+        float h = dir.y;
+        dir.y = 0;
+        float dist = dir.magnitude;
+        float a = angle * Mathf.Deg2Rad;
+        dir.Normalize();
+
+        float g = Physics.gravity.magnitude;
+        float tanA = Mathf.Tan(a);
+        float term = (dist * tanA) - h;
+
+        if (term <= 0.01f) return (dir + Vector3.up).normalized * 15f;
+
+        float v = Mathf.Sqrt((g * dist * dist) / (2 * Mathf.Cos(a) * Mathf.Cos(a) * term));
+        return (dir * v * Mathf.Cos(a)) + (Vector3.up * v * Mathf.Sin(a));
+    }
+
+    // --------------------------------------------------------------------------------
+    // è¾…åŠ©
+    // --------------------------------------------------------------------------------
+    void OnCollisionStay(Collision collision)
+    {
+        if (isDead || isChasing || isAttacking) return;
+        if (((1 << collision.gameObject.layer) & obstacleLayer) == 0) return;
+
+        foreach (ContactPoint contact in collision.contacts)
+        {
+            if (contact.normal.y < 0.7f)
+            {
+                SwitchPatrolPoint("ç¢°æ’å¢™å£");
+                return;
+            }
+        }
+    }
+
+    void CheckIfStuck()
+    {
+        if (Time.time >= nextStuckCheckTime)
+        {
+            float distanceMoved = Vector3.Distance(rb.position, lastStuckCheckPos);
+            if (distanceMoved < minMoveDistance) SwitchPatrolPoint("ä½ç½®å¡æ­»");
+            lastStuckCheckPos = rb.position;
+            nextStuckCheckTime = Time.time + stuckCheckInterval;
+        }
     }
 
     void FaceTarget(Vector3 target)
@@ -268,27 +401,12 @@ public class AdvancedEnemyAI : MonoBehaviour
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, detectionRange);
-
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, attackRange);
-
-        // »æÖÆÑ²Âßµã
-        Gizmos.color = Color.blue;
-        foreach (Vector3 point in patrolPoints)
-        {
-            Gizmos.DrawWireSphere(point, 0.2f);
-            Gizmos.DrawLine(transform.position, point);
-        }
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(transform.position, losePlayerRange);
+        Gizmos.color = new Color(0, 1, 0, 0.3f);
+        if (Application.isPlaying) Gizmos.DrawWireSphere(spawnPosition, patrolRadius);
+        else Gizmos.DrawWireSphere(transform.position, patrolRadius);
     }
 
-    public void MarkAsDead()
-    {
-        isDead = true;
-    }
-
-    // Íâ²¿µ÷ÓÃ£ºÖØĞÂÉú³ÉÑ²Âßµã£¨ÓÃÓÚÑ©ÈËÒÆ¶¯ºó£©
-    public void RegeneratePatrolPoints()
-    {
-        GeneratePatrolPoints();
-    }
+    public void MarkAsDead() { isDead = true; }
 }

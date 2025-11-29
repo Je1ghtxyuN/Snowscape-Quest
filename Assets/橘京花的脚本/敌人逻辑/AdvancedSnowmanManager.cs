@@ -1,110 +1,112 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections.Generic;
 
 public class AdvancedSnowmanManager : MonoBehaviour
 {
-    [Header("Ñ©ÈËÉú³ÉÉèÖÃ")]
+    [Header("é›ªäººé¢„åˆ¶ä½“")]
     public GameObject snowmanPrefab;
-    public int snowmenPerRound = 5;
+
+    [Header("ç”Ÿæˆå‚æ•°")]
     public float minDistanceFromPlayer = 8f;
     public float minDistanceBetweenSnowmen = 3f;
+    [Tooltip("ç”Ÿæˆé«˜åº¦åç§»é‡")]
+    public float spawnHeightOffset = 2.0f;
 
-    [Header("ÇøÓòÉèÖÃ")]
-    public List<string> allowedAreas = new List<string>(); // ÔÊĞíÉú³ÉÑ©ÈËµÄÇøÓòÃû³Æ
+    [Header("åŒºåŸŸè®¾ç½®")]
+    public List<string> allowedAreas = new List<string>();
 
     private AdvancedGameAreaManager areaManager;
     private Transform player;
+    // åˆ—è¡¨ç”¨äºç®¡ç†å½“å‰å­˜åœ¨çš„é›ªäºº
     private List<GameObject> currentSnowmen = new List<GameObject>();
 
-    void Start()
+    void Awake()
     {
         areaManager = FindObjectOfType<AdvancedGameAreaManager>();
-        player = GameObject.FindGameObjectWithTag("Player").transform;
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null) player = playerObj.transform;
 
-        if (areaManager == null)
+        if (areaManager == null) Debug.LogError("âŒ æœªæ‰¾åˆ° AdvancedGameAreaManagerï¼");
+    }
+
+    // â­ ä¿®æ”¹ï¼šä¸å†åœ¨ Start ä¸­è‡ªåŠ¨ç”Ÿæˆï¼Œè€Œæ˜¯ç”± GameManager è°ƒç”¨
+    public void SpawnEnemies(int count)
+    {
+        // æ¸…ç†ä¸Šä¸€è½®å¯èƒ½æ®‹ç•™çš„é›ªäººï¼ˆç†è®ºä¸Šéƒ½è¢«æ‰“æ­»äº†ï¼Œä½†ä¸ºäº†å®‰å…¨ï¼‰
+        ClearDeadSnowmen();
+
+        if (player == null || areaManager == null) return;
+
+        List<Vector3> spawnPositions = GenerateValidSpawnPositions(count);
+
+        if (spawnPositions.Count == 0)
         {
-            Debug.LogError("Î´ÕÒµ½AdvancedGameAreaManager£¡");
+            Debug.LogWarning("âš ï¸ æœªèƒ½ç”Ÿæˆä»»ä½•æœ‰æ•ˆçš„é›ªäººä½ç½®ã€‚");
+            // æç«¯æƒ…å†µè¡¥æ•‘ï¼šå¦‚æœç”Ÿæˆå¤±è´¥ï¼Œä¹Ÿè¦é€šçŸ¥ç®¡ç†å™¨å‡å°‘å­˜æ´»æ•°ï¼Œå¦åˆ™æ¸¸æˆä¼šå¡æ­»
+            for (int i = 0; i < count; i++) GameRoundManager.Instance.OnEnemyKilled();
             return;
         }
 
-        SpawnRoundSnowmen();
-    }
-
-    public void SpawnRoundSnowmen()
-    {
-        ClearCurrentSnowmen();
-
-        List<Vector3> spawnPositions = GenerateValidSpawnPositions(snowmenPerRound);
+        // å¦‚æœç”Ÿæˆç‚¹å°‘äºè¯·æ±‚æ•°ï¼ˆä½ç½®ä¸å¤Ÿï¼‰ï¼ŒæŠŠæ²¡ç”Ÿæˆçš„è¡¥ä¸Šæ­»äº¡è®¡æ•°
+        int missingCount = count - spawnPositions.Count;
+        for (int i = 0; i < missingCount; i++) GameRoundManager.Instance.OnEnemyKilled();
 
         foreach (Vector3 position in spawnPositions)
         {
             GameObject snowman = Instantiate(snowmanPrefab, position, Quaternion.identity);
-
-            // ÉèÖÃ¸ß¼¶AI×é¼ş
-            AdvancedEnemyAI snowmanAI = snowman.GetComponent<AdvancedEnemyAI>();
-            if (snowmanAI != null)
-            {
-                // Ñ²Âßµã»áÔÚAIµÄStartÖĞ×Ô¶¯Éú³É
-            }
-
             currentSnowmen.Add(snowman);
         }
 
-        Debug.Log($"Éú³É {spawnPositions.Count} ¸öÑ©ÈË");
+        Debug.Log($"âœ… æœ¬å›åˆæˆåŠŸç”Ÿæˆ {spawnPositions.Count} ä¸ªé›ªäºº");
     }
 
     private List<Vector3> GenerateValidSpawnPositions(int count)
     {
         List<Vector3> positions = new List<Vector3>();
-        int maxAttempts = count * 10; // ·ÀÖ¹ÎŞÏŞÑ­»·
+        int attempts = 0;
+        int maxAttempts = count * 20;
 
-        for (int i = 0; i < count && positions.Count < maxAttempts; i++)
+        while (positions.Count < count && attempts < maxAttempts)
         {
+            attempts++;
             Vector3 randomPos = GetRandomPositionInAllowedAreas();
+            if (randomPos == Vector3.zero) continue;
 
             if (IsValidSpawnPosition(randomPos, positions))
             {
                 positions.Add(randomPos);
             }
         }
-
         return positions;
     }
 
     private Vector3 GetRandomPositionInAllowedAreas()
     {
-        // »ñÈ¡ËùÓĞÔÊĞíµÄÇøÓò
         List<AdvancedGameAreaManager.GameArea> availableAreas = new List<AdvancedGameAreaManager.GameArea>();
+        if (areaManager.gameAreas == null) return Vector3.zero;
 
         foreach (var area in areaManager.gameAreas)
         {
-            if (area.isActive && (allowedAreas.Count == 0 || allowedAreas.Contains(area.areaName)))
+            if (area.isActive)
             {
-                availableAreas.Add(area);
+                if (allowedAreas.Count == 0 || allowedAreas.Contains(area.areaName))
+                    availableAreas.Add(area);
             }
         }
 
-        if (availableAreas.Count == 0)
-        {
-            Debug.LogWarning("Ã»ÓĞ¿ÉÓÃµÄÉú³ÉÇøÓò£¡");
-            return Vector3.zero;
-        }
+        if (availableAreas.Count == 0) return Vector3.zero;
 
-        // Ëæ»úÑ¡ÔñÒ»¸öÇøÓò
         AdvancedGameAreaManager.GameArea selectedArea = availableAreas[Random.Range(0, availableAreas.Count)];
-
-        // ÔÚÇøÓòÄÚËæ»úÉú³Éµã
-        return GetRandomPointInPolygon(selectedArea.boundaryPoints);
+        return GetRandomPointInArea(selectedArea);
     }
 
-    private Vector3 GetRandomPointInPolygon(List<Vector3> polygon)
+    private Vector3 GetRandomPointInArea(AdvancedGameAreaManager.GameArea area)
     {
+        List<Vector3> polygon = area.GetBoundaryPoints();
         if (polygon.Count < 3) return Vector3.zero;
 
-        // Ê¹ÓÃÈı½ÇĞÎÆÊ·Ö·½·¨Éú³ÉËæ»úµã
         Vector3 min = polygon[0];
         Vector3 max = polygon[0];
-
         foreach (Vector3 point in polygon)
         {
             min = Vector3.Min(min, point);
@@ -113,58 +115,43 @@ public class AdvancedSnowmanManager : MonoBehaviour
 
         Vector3 randomPoint;
         int attempts = 0;
+        bool isValid = false;
 
         do
         {
             randomPoint = new Vector3(
                 Random.Range(min.x, max.x),
-                0,
+                spawnHeightOffset,
                 Random.Range(min.z, max.z)
             );
             attempts++;
+            if (areaManager.IsPointInArea(randomPoint, area)) isValid = true;
         }
-        while (!areaManager.IsPointInArea(randomPoint, areaManager.GetPointArea(randomPoint)) && attempts < 100);
+        while (!isValid && attempts < 50);
 
-        return randomPoint;
+        return isValid ? randomPoint : Vector3.zero;
     }
 
     private bool IsValidSpawnPosition(Vector3 position, List<Vector3> existingPositions)
     {
-        // ¼ì²é¾àÀëÍæ¼Ò
-        if (Vector3.Distance(position, player.position) < minDistanceFromPlayer)
-            return false;
+        Vector3 flatPos = new Vector3(position.x, 0, position.z);
+        Vector3 flatPlayerPos = new Vector3(player.position.x, 0, player.position.z);
 
-        // ¼ì²é¾àÀëÆäËûÑ©ÈË
+        if (Vector3.Distance(flatPos, flatPlayerPos) < minDistanceFromPlayer) return false;
+
         foreach (Vector3 existingPos in existingPositions)
         {
-            if (Vector3.Distance(position, existingPos) < minDistanceBetweenSnowmen)
-                return false;
+            Vector3 flatExisting = new Vector3(existingPos.x, 0, existingPos.z);
+            if (Vector3.Distance(flatPos, flatExisting) < minDistanceBetweenSnowmen) return false;
         }
-
         return true;
     }
 
-    private void ClearCurrentSnowmen()
+    private void ClearDeadSnowmen()
     {
-        foreach (GameObject snowman in currentSnowmen)
+        for (int i = currentSnowmen.Count - 1; i >= 0; i--)
         {
-            if (snowman != null)
-                Destroy(snowman);
+            if (currentSnowmen[i] == null) currentSnowmen.RemoveAt(i);
         }
-        currentSnowmen.Clear();
-    }
-
-    // »ñÈ¡µ±Ç°´æ»îµÄÑ©ÈËÊıÁ¿
-    public int GetAliveSnowmenCount()
-    {
-        int count = 0;
-        foreach (GameObject snowman in currentSnowmen)
-        {
-            if (snowman != null && !snowman.GetComponent<AdvancedEnemyAI>().isDead)
-            {
-                count++;
-            }
-        }
-        return count;
     }
 }

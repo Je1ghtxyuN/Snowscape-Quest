@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
@@ -7,25 +7,25 @@ public class EnemyHealth : MonoBehaviour
 {
     [Header("Health Settings")]
     [SerializeField] private float initialHealth = 100f;
-    // ÑªÌõUIÔ¤ÖÆÌå
+    // è¡€æ¡UIé¢„åˆ¶ä½“
     [SerializeField] private GameObject healthBarPrefab;
 
-    [Header("ËÀÍöÌØĞ§")]
-    // Á£×ÓÔ¤ÖÆÌå
+    [Header("æ­»äº¡ç‰¹æ•ˆ")]
+    // ç²’å­é¢„åˆ¶ä½“
     [SerializeField] private GameObject explosionParticlePrefab;
 
-    [Header("ÉùÒôÌØĞ§")]
-    [SerializeField] private AudioClip deathSound; // ÒôĞ§×ÊÔ´
-    private AudioSource audioSource; // ÒôÆµÔ´×é¼ş
+    [Header("å£°éŸ³ç‰¹æ•ˆ")]
+    [SerializeField] private AudioClip deathSound; // éŸ³æ•ˆèµ„æº
+    private AudioSource audioSource; // éŸ³é¢‘æºç»„ä»¶
 
-    [Header("±ù¾§µôÂä")]
-    [SerializeField] private GameObject iceCrystalPrefab; // ±ù¾§Ô¤ÖÆÌå
-    [SerializeField] private float crystalDropChance = 0.7f; // µôÂä¸ÅÂÊ
+    [Header("å†°æ™¶æ‰è½")]
+    [SerializeField] private GameObject iceCrystalPrefab; // å†°æ™¶é¢„åˆ¶ä½“
+    [SerializeField] private float crystalDropChance = 0.7f; // æ‰è½æ¦‚ç‡
 
-    // ËÀÍö×´Ì¬
+    // æ­»äº¡çŠ¶æ€
     private bool isDead = false;
 
-    // ´´½¨¶ÔÏó
+    // åˆ›å»ºå¯¹è±¡
     private Health healthSystem;
     private HealthUI healthUI;
 
@@ -35,15 +35,15 @@ public class EnemyHealth : MonoBehaviour
 
     void Start()
     {
-        // ³õÊ¼»¯ÑªÁ¿ÏµÍ³
+        // åˆå§‹åŒ–è¡€é‡ç³»ç»Ÿ
         healthSystem = new Health(initialHealth);
 
-        // ¶©ÔÄËÀÍöÊÂ¼ş
+        // è®¢é˜…æ­»äº¡äº‹ä»¶
         healthSystem.OnDeath += Die;
 
         animator = GetComponent<Animator>();
 
-        // ÊµÀı»¯ÑªÌõUI
+        // å®ä¾‹åŒ–è¡€æ¡UI
         if (healthBarPrefab != null)
         {
             GameObject healthBarObj = Instantiate(
@@ -56,48 +56,49 @@ public class EnemyHealth : MonoBehaviour
             healthUI.Initialize(transform, healthSystem);
         }
 
-        // Ìí¼Ó²¢»ñÈ¡ÒôÆµÔ´×é¼ş
+        // æ·»åŠ å¹¶è·å–éŸ³é¢‘æºç»„ä»¶
         audioSource = gameObject.AddComponent<AudioSource>();
-        audioSource.spatialBlend = 0f; // 2D¿Õ¼äÒôĞ§
+        audioSource.spatialBlend = 0f; // 2Dç©ºé—´éŸ³æ•ˆ
         audioSource.rolloffMode = AudioRolloffMode.Logarithmic;
 
-        // ²âÊÔÓÃ£º3Ãëºó¿ªÊ¼ÊÜµ½ÉËº¦
+        // æµ‹è¯•ç”¨ï¼š3ç§’åå¼€å§‹å—åˆ°ä¼¤å®³
         InvokeRepeating("ApplyTestDamage", 3f, 1f);
     }
 
-    // ÊÜÉË²âÊÔ
+    // å—ä¼¤æµ‹è¯•
     private void ApplyTestDamage()
     {
         //TakeDamage(50f);
-        //UnityEngine.Debug.Log("Enemy²âÊÔÊÜµ½ÉËº¦");
+        //UnityEngine.Debug.Log("Enemyæµ‹è¯•å—åˆ°ä¼¤å®³");
     }
 
-    // ÊÕµ½ÉËº¦µÄ·½·¨
+    // æ”¶åˆ°ä¼¤å®³çš„æ–¹æ³•
     public void TakeDamage(float amount)
     {
-        if (isDead) return; // ÒÑËÀÍö²»ÔÙÏìÓ¦ÉËº¦
+        if (isDead) return; // å·²æ­»äº¡ä¸å†å“åº”ä¼¤å®³
         healthSystem.TakeDamage(amount);
-        // ¿ÉÌí¼ÓÉËº¦ÌØĞ§¡¢ÒôĞ§µÈ
+        // å¯æ·»åŠ ä¼¤å®³ç‰¹æ•ˆã€éŸ³æ•ˆç­‰
     }
 
-    // ËÀÍö´¦Àí£¨ÓÉOnDeathÊÂ¼ş´¥·¢£©
+    // æ­»äº¡å¤„ç†ï¼ˆç”±OnDeathäº‹ä»¶è§¦å‘ï¼‰
     private void Die()
     {
-        if (isDead) return; // ±ÜÃâÖØ¸´´¥·¢
+        if (isDead) return;
         isDead = true;
 
-        // È¡ÏûÊÂ¼ş¶©ÔÄ·ÀÖ¹ÖØ¸´µ÷ÓÃ
         healthSystem.OnDeath -= Die;
 
-        CastleGate.ScoreSystem.AddRegularEnemyScore();
+        // â­ ä¿®æ”¹ï¼šç§»é™¤åˆ†æ•°è°ƒç”¨ï¼Œæ”¹ä¸ºé€šçŸ¥ç®¡ç†å™¨
+        if (GameRoundManager.Instance != null)
+        {
+            //GameRoundManager.Instance.OnEnemyKilled();//æ™®é€šé›ªäººä¸è®¡å…¥
+        }
 
-        // µôÂä±ù¾§
         if (Random.value <= crystalDropChance && iceCrystalPrefab != null)
         {
             DropIceCrystal();
         }
 
-        // ËÀÍöÂß¼­
         StartCoroutine(DeathRoutine());
     }
 
@@ -106,14 +107,14 @@ public class EnemyHealth : MonoBehaviour
         Vector3 dropPosition = transform.position + Vector3.up * 1f;
         GameObject crystal = Instantiate(iceCrystalPrefab, dropPosition, Quaternion.identity);
 
-        // Ìí¼ÓÆ¯¸¡Ğ§¹û
+        // æ·»åŠ æ¼‚æµ®æ•ˆæœ
         StartCoroutine(FloatingCrystal(crystal));
     }
 
-    // ĞŞ¸Ä²ÎÊıÀàĞÍ
+    // ä¿®æ”¹å‚æ•°ç±»å‹
     private IEnumerator FloatingCrystal(GameObject crystal)
     {
-        // ·½·¨Ìå±£³Ö²»±ä
+        // æ–¹æ³•ä½“ä¿æŒä¸å˜
         float floatHeight = 0.5f;
         float floatSpeed = 2f;
         Vector3 startPos = crystal.transform.position;
@@ -129,17 +130,17 @@ public class EnemyHealth : MonoBehaviour
         Destroy(crystal);
     }
 
-    // ËÀÍöĞ­³Ì£¨´¦Àí¶¯»­ºÍÏú»Ù£©
+    // æ­»äº¡åç¨‹ï¼ˆå¤„ç†åŠ¨ç”»å’Œé”€æ¯ï¼‰
     private IEnumerator DeathRoutine()
     {
-        // 1. ½ûÓÃÅö×²Ìå£¨ÏÔÊ½ÅĞ¿Õ£©
+        // 1. ç¦ç”¨ç¢°æ’ä½“ï¼ˆæ˜¾å¼åˆ¤ç©ºï¼‰
         Collider collider = GetComponent<Collider>();
         if (collider != null)
         {
             collider.enabled = false;
         }
 
-        // 2. ´¥·¢ËùÓĞÊÓ¾õĞ§¹û£¨¶¯»­/ÒôĞ§/Á£×Ó£©
+        // 2. è§¦å‘æ‰€æœ‰è§†è§‰æ•ˆæœï¼ˆåŠ¨ç”»/éŸ³æ•ˆ/ç²’å­ï¼‰
         if (animator != null)
             animator.SetTrigger("die");
 
@@ -150,14 +151,14 @@ public class EnemyHealth : MonoBehaviour
         if (explosionParticlePrefab != null)
         {
             explosion = Instantiate(explosionParticlePrefab, transform.position, Quaternion.identity);
-            Destroy(explosion, 2f); // ÑÓ³¤Á£×ÓÉúÃüÖÜÆÚ
+            Destroy(explosion, 2f); // å»¶é•¿ç²’å­ç”Ÿå‘½å‘¨æœŸ
         }
 
-        // 3. Á¢¼´Ïú»ÙÖ÷ÎïÌå(±£ÁôÊÓ¾õĞ§¹û¼ÌĞø²¥·Å£©
+        // 3. ç«‹å³é”€æ¯ä¸»ç‰©ä½“(ä¿ç•™è§†è§‰æ•ˆæœç»§ç»­æ’­æ”¾ï¼‰
         if (healthUI != null)
             Destroy(healthUI.gameObject);
 
-        // Òş²ØÎïÌåµ«±£Áô×é¼şÔËĞĞ
+        // éšè—ç‰©ä½“ä½†ä¿ç•™ç»„ä»¶è¿è¡Œ
         if (TryGetComponent<Renderer>(out var renderer))
         {
             renderer.enabled = false;
@@ -165,33 +166,33 @@ public class EnemyHealth : MonoBehaviour
         foreach (Transform child in transform)
             child.gameObject.SetActive(false);
 
-        // 4. ½öµÈ´ı¶¯»­Ê±³¤£¨²»µÈ´ıÒôĞ§/Á£×Ó£©
+        // 4. ä»…ç­‰å¾…åŠ¨ç”»æ—¶é•¿ï¼ˆä¸ç­‰å¾…éŸ³æ•ˆ/ç²’å­ï¼‰
         if (animator != null)
         {
-            // Ç¿ÖÆ¶¯»­Á¢¼´¸üĞÂ
+            // å¼ºåˆ¶åŠ¨ç”»ç«‹å³æ›´æ–°
             animator.Update(0f);
 
             yield return new WaitUntil(() =>
                 animator.GetCurrentAnimatorStateInfo(0).IsName("DeathState")
             );
 
-            // ¾«È·µÈ´ı¶¯»­³¤¶È
+            // ç²¾ç¡®ç­‰å¾…åŠ¨ç”»é•¿åº¦
             yield return new WaitForSeconds(
                 animator.GetCurrentAnimatorStateInfo(0).length
             );
         }
         else
         {
-            yield return new WaitForSeconds(0.3f); // ×îĞ¡µÈ´ıÊ±¼ä
+            yield return new WaitForSeconds(0.3f); // æœ€å°ç­‰å¾…æ—¶é—´
         }
 
-        // 5. ×îÖÕÏú»Ù
+        // 5. æœ€ç»ˆé”€æ¯
         Destroy(gameObject);
     }
 
     void OnDestroy()
     {
-        // °²È«È¡ÏûÊÂ¼ş¶©ÔÄ
+        // å®‰å…¨å–æ¶ˆäº‹ä»¶è®¢é˜…
         if (healthSystem != null)
             healthSystem.OnDeath -= Die;
     }

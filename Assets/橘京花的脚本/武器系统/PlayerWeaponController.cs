@@ -1,0 +1,103 @@
+﻿using UnityEngine;
+using UnityEngine.InputSystem;
+
+public class PlayerWeaponController : MonoBehaviour
+{
+    [Header("输入设置")]
+    public InputActionReference switchWeaponAction;
+
+    [Header("武器引用")]
+    [Tooltip("原本的雪球投掷脚本")]
+    public SnowballThrower snowballThrower;
+    [Tooltip("寒冰剑的游戏物体")]
+    public GameObject iceSwordObject;
+
+    [Header("状态")]
+    public bool hasUnlockedSword = false;
+    private bool isSwordActive = false;
+
+    void Start()
+    {
+        if (snowballThrower != null) snowballThrower.enabled = true;
+        if (iceSwordObject != null) iceSwordObject.SetActive(false);
+
+        if (switchWeaponAction != null)
+        {
+            switchWeaponAction.action.Enable();
+            switchWeaponAction.action.performed += OnSwitchWeaponPressed;
+        }
+    }
+
+    // 每一帧检查游戏是否暂停以及武器状态
+    void Update()
+    {
+        // 1. 如果游戏暂停 (Time.timeScale == 0)
+        if (Time.timeScale == 0f)
+        {
+            // 隐藏所有武器
+            if (iceSwordObject != null && iceSwordObject.activeSelf)
+            {
+                iceSwordObject.SetActive(false);
+            }
+            if (snowballThrower != null && snowballThrower.enabled)
+            {
+                snowballThrower.enabled = false;
+            }
+        }
+        // 2. 如果游戏正常进行 (Time.timeScale > 0)
+        else
+        {
+            // 根据当前模式决定谁显谁隐
+            if (isSwordActive)
+            {
+                // 剑模式：显示剑，禁用雪球
+                if (iceSwordObject != null && !iceSwordObject.activeSelf)
+                    iceSwordObject.SetActive(true);
+
+                // ⭐ 修复点：在这里强制禁用雪球脚本
+                if (snowballThrower != null && snowballThrower.enabled)
+                    snowballThrower.enabled = false;
+            }
+            else
+            {
+                // 雪球模式：隐藏剑，启用雪球
+                if (iceSwordObject != null && iceSwordObject.activeSelf)
+                    iceSwordObject.SetActive(false);
+
+                if (snowballThrower != null && !snowballThrower.enabled)
+                    snowballThrower.enabled = true;
+            }
+        }
+    }
+
+    private void OnSwitchWeaponPressed(InputAction.CallbackContext context)
+    {
+        // 暂停时禁止切换
+        if (Time.timeScale == 0f) return;
+
+        if (!hasUnlockedSword) return;
+        ToggleWeapon();
+    }
+
+    public void UnlockSword()
+    {
+        hasUnlockedSword = true;
+        if (!isSwordActive)
+        {
+            ToggleWeapon();
+        }
+        Debug.Log("武器解锁：寒冰剑！");
+    }
+
+    private void ToggleWeapon()
+    {
+        isSwordActive = !isSwordActive;
+        // 具体的 SetActive/Enabled 逻辑已移交 Update 处理
+    }
+
+    void OnDestroy()
+    {
+        if (switchWeaponAction != null)
+            switchWeaponAction.action.performed -= OnSwitchWeaponPressed;
+    }
+}

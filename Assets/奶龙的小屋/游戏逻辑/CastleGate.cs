@@ -1,126 +1,89 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections;
-using System.Diagnostics;
 
 public class CastleGate : MonoBehaviour
 {
-    [Header("Ğı×ªÉèÖÃ")]
-    public float rotationAngle = 105f; // Ğı×ª½Ç¶È
-    public float rotationDuration = 2.0f; // Ğı×ª³ÖĞøÊ±¼ä
+    [Header("æ—‹è½¬è®¾ç½®")]
+    public float rotationAngle = 105f;
+    public float rotationDuration = 2.0f;
 
-    [Header("ÃÅÉÈÄ£ĞÍÒıÓÃ")]
-    public Transform leftDoor; // ×ó²àÃÅÉÈ
-    public Transform rightDoor; // ÓÒ²àÃÅÉÈ
+    [Header("é—¨æ‰‡æ¨¡å‹")]
+    public Transform leftDoor;
+    public Transform rightDoor;
 
-    [Header("¿ªÃÅÌõ¼ş")]
-    public int requiredScore = 10; // ¿ªÆô´óÃÅËùĞèµÄ·ÖÊı
+    private Vector3 leftDoorInitialRotation;
+    private Vector3 rightDoorInitialRotation;
+    private Vector3 leftDoorTargetRotation;
+    private Vector3 rightDoorTargetRotation;
+    private bool isRotating = false;
 
-    private Vector3 leftDoorInitialRotation; // ×ó²àÃÅÉÈ³õÊ¼Ğı×ª
-    private Vector3 rightDoorInitialRotation; // ÓÒ²àÃÅÉÈ³õÊ¼Ğı×ª
-    private Vector3 leftDoorTargetRotation; // ×ó²àÃÅÉÈÄ¿±êĞı×ª
-    private Vector3 rightDoorTargetRotation; // ÓÒ²àÃÅÉÈÄ¿±êĞı×ª
+    [Header("ç¢°æ’ä½“è®¾ç½®")]
+    public Collider specificColliderToRemove;
 
-    private bool isRotating = false; // ÊÇ·ñÕıÔÚĞı×ª
-
-    [Header("Åö×²ÌåÉèÖÃ")]
-    public Collider specificColliderToRemove; // ´óÃÅÅö×²Ìå
-
-    [Header("ÒôĞ§ÉèÖÃ")]
-    public AudioClip openSound; // ¿ªÃÅÒôĞ§
+    [Header("éŸ³æ•ˆè®¾ç½®")]
+    public AudioClip openSound;
     private AudioSource audioSource;
 
-    [Header("´¥·¢Æ÷ÉèÖÃ")]
-    public Collider triggerCollider; // ´¥·¢Æ÷Åö×²Ìå
-    private bool hasOpened = false; // ·ÀÖ¹ÖØ¸´´¥·¢
-
-    // È«¾Ö·ÖÊıÏµÍ³£¨µ¥ÀıÄ£Ê½£©
-    private static ScoreSystem scoreSystemInstance;
-    public static ScoreSystem ScoreSystem
-    {
-        get
-        {
-            if (scoreSystemInstance == null)
-            {
-                scoreSystemInstance = new ScoreSystem();
-            }
-            return scoreSystemInstance;
-        }
-    }
+    [Header("è§¦å‘å™¨è®¾ç½®")]
+    public Collider triggerCollider;
+    private bool hasOpened = false;
 
     void Start()
     {
-        // ±£´æ³õÊ¼Ğı×ª
         leftDoorInitialRotation = leftDoor.localEulerAngles;
         rightDoorInitialRotation = rightDoor.localEulerAngles;
-
-        // ¼ÆËãÄ¿±êĞı×ª
         leftDoorTargetRotation = leftDoorInitialRotation + new Vector3(0, 0, rotationAngle);
         rightDoorTargetRotation = rightDoorInitialRotation + new Vector3(0, 0, -rotationAngle);
 
-        // ×Ô¶¯»ñÈ¡ÒôÆµÔ´×é¼ş
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
         {
             audioSource = gameObject.AddComponent<AudioSource>();
-            audioSource.spatialBlend = 0f; // 3DÒôĞ§ĞèÒª¸Ä³É1
+            audioSource.spatialBlend = 0f; // å»ºè®®æ”¹ä¸º1fä»¥å¯ç”¨3DéŸ³æ•ˆ
         }
 
-        // È·±£´¥·¢Æ÷ÒÑÆôÓÃ
         if (triggerCollider != null) triggerCollider.isTrigger = true;
-
-        // µ÷ÊÔĞÅÏ¢
-        UnityEngine.Debug.Log($"×ó²àÃÅÉÈ³õÊ¼Ğı×ª: {leftDoorInitialRotation}, Ä¿±êĞı×ª: {leftDoorTargetRotation}");
-        UnityEngine.Debug.Log($"ÓÒ²àÃÅÉÈ³õÊ¼Ğı×ª: {rightDoorInitialRotation}, Ä¿±êĞı×ª: {rightDoorTargetRotation}");
     }
 
-    // ¼ì²â·ÖÊıÊÇ·ñ´ï±ê
-    private bool ScoreReached()
+    // â­ æ ¸å¿ƒä¿®æ”¹ï¼šæ£€æŸ¥æ˜¯å¦æ‰€æœ‰å›åˆå·²ç»“æŸ
+    private bool CanOpenGate()
     {
-        return ScoreSystem.CurrentScore >= requiredScore;
+        if (GameRoundManager.Instance == null) return false;
+        return GameRoundManager.Instance.isGameComplete;
     }
 
-    // ´¥·¢Æ÷½øÈë¼ì²â
     private void OnTriggerEnter(Collider other)
     {
         if (hasOpened) return;
 
-        // ½öÍæ¼Ò´¥·¢ÇÒ·ÖÊı´ï±ê
-        if (other.CompareTag("Player") && ScoreReached())
+        // â­ ä¿®æ”¹ï¼šåˆ¤æ–­æ¡ä»¶æ”¹ä¸º CanOpenGate()
+        if (other.CompareTag("Player") && CanOpenGate())
         {
             StartCoroutine(OpenGateSequence());
-            UnityEngine.Debug.Log("´¥·¢¿ªÃÅ");
+            Debug.Log("å¤§é—¨å¼€å¯ï¼");
+        }
+        else if (other.CompareTag("Player") && !CanOpenGate())
+        {
+            Debug.Log("é—¨æ˜¯é”ç€çš„ï¼Œè¿˜éœ€è¦æ¸…ç©ºæ›´å¤šæ•Œäººã€‚");
         }
     }
 
-    // ¿ªÃÅĞ­³Ì£¨Æ½»¬Ğı×ª+ÒôĞ§£©
     private IEnumerator OpenGateSequence()
     {
         hasOpened = true;
         isRotating = true;
 
-        // ²¥·Å¿ªÃÅÒôĞ§
-        if (openSound != null)
-        {
-            audioSource.PlayOneShot(openSound);
-            UnityEngine.Debug.Log("ÒôĞ§²¥·Å");
-        }
+        if (openSound != null) audioSource.PlayOneShot(openSound);
 
-        // Æ½»¬Ğı×ªÃÅÉÈ
         float elapsedTime = 0f;
         Vector3 leftDoorStartRot = leftDoor.localEulerAngles;
         Vector3 rightDoorStartRot = rightDoor.localEulerAngles;
 
-        UnityEngine.Debug.Log($"¿ªÊ¼Ğı×ª: ×óÃÅ´Ó {leftDoorStartRot} µ½ {leftDoorTargetRotation}");
-        UnityEngine.Debug.Log($"¿ªÊ¼Ğı×ª: ÓÒÃÅ´Ó {rightDoorStartRot} µ½ {rightDoorTargetRotation}");
-
         while (elapsedTime < rotationDuration)
         {
-            // ¼ÆËã²åÖµ±ÈÀı
             float t = elapsedTime / rotationDuration;
-            // Ê¹ÓÃÆ½»¬µÄ²åÖµº¯Êı
             t = Mathf.SmoothStep(0f, 1f, t);
 
-            // ¸üĞÂÃÅÉÈµÄĞı×ª½Ç¶È
             leftDoor.localEulerAngles = Vector3.Lerp(leftDoorStartRot, leftDoorTargetRotation, t);
             rightDoor.localEulerAngles = Vector3.Lerp(rightDoorStartRot, rightDoorTargetRotation, t);
 
@@ -128,54 +91,11 @@ public class CastleGate : MonoBehaviour
             yield return null;
         }
 
-        // È·±£×îÖÕĞı×ª½Ç¶È×¼È·
         leftDoor.localEulerAngles = leftDoorTargetRotation;
         rightDoor.localEulerAngles = rightDoorTargetRotation;
         isRotating = false;
 
-        UnityEngine.Debug.Log($"Ğı×ªÍê³É£¬×óÃÅ×îÖÕĞı×ª: {leftDoor.localEulerAngles}");
-        UnityEngine.Debug.Log($"Ğı×ªÍê³É£¬ÓÒÃÅ×îÖÕĞı×ª: {rightDoor.localEulerAngles}");
-
-        // È¥³ı´óÃÅÅö×²Ìå
-        if (specificColliderToRemove != null)
-        {
-            specificColliderToRemove.enabled = false;
-        }
-        else
-        {
-            UnityEngine.Debug.LogWarning("Î´ÕÒµ½Åö×²ÌåÒıÓÃ");
-        }
-
-        // ½ûÓÃ´¥·¢Æ÷·ÀÖ¹ÖØ¸´´¥·¢
-        if (triggerCollider != null)
-            triggerCollider.enabled = false;
-    }
-}
-
-// È«¾Ö·ÖÊıÏµÍ³
-public class ScoreSystem
-{
-    private int currentScore = 0;
-
-    public int CurrentScore => currentScore;
-
-    // Ôö¼Ó·ÖÊı£¨ÆÕÍ¨µĞÈËµ÷ÓÃ£©
-    public void AddRegularEnemyScore()
-    {
-        currentScore += 1;
-        UnityEngine.Debug.Log($"ÆÕÍ¨µĞÈË±»»÷°Ü£¡µ±Ç°·ÖÊı: {currentScore}");
-    }
-
-    // Ôö¼Ó·ÖÊı£¨¾«Ó¢µĞÈËµ÷ÓÃ£©
-    public void AddEliteEnemyScore()
-    {
-        currentScore += 2;
-        UnityEngine.Debug.Log($"¾«Ó¢µĞÈË±»»÷°Ü£¡µ±Ç°·ÖÊı: {currentScore}");
-    }
-
-    // ÖØÖÃ·ÖÊı
-    public void ResetScore()
-    {
-        currentScore = 0;
+        if (specificColliderToRemove != null) specificColliderToRemove.enabled = false;
+        if (triggerCollider != null) triggerCollider.enabled = false;
     }
 }

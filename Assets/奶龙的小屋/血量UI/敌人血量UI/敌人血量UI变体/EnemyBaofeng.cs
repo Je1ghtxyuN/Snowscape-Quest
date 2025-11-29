@@ -1,50 +1,47 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
-
 
 public class EnemyBaofeng : MonoBehaviour
 {
     [Header("Health Settings")]
     [SerializeField] private float initialHealth = 100f;
-    // ÑªÌõUIÔ¤ÖÆÌå
+    // è¡€æ¡UIé¢„åˆ¶ä½“
     [SerializeField] private GameObject healthBarPrefab;
 
-    [Header("ËÀÍöÌØĞ§")]
-    // Á£×ÓÔ¤ÖÆÌå
+    [Header("æ­»äº¡ç‰¹æ•ˆ")]
+    // ç²’å­é¢„åˆ¶ä½“
     [SerializeField] private GameObject explosionParticlePrefab;
 
-    [Header("ÉùÒôÌØĞ§")]
-    [SerializeField] private AudioClip deathSound; // ÒôĞ§×ÊÔ´
-    private AudioSource audioSource; // ÒôÆµÔ´×é¼ş
+    [Header("å£°éŸ³ç‰¹æ•ˆ")]
+    [SerializeField] private AudioClip deathSound; // éŸ³æ•ˆèµ„æº
+    private AudioSource audioSource; // éŸ³é¢‘æºç»„ä»¶
 
-    [Header("±ù¾§µôÂä")]
-    [SerializeField] private GameObject iceCrystalPrefab; // ±ù¾§Ô¤ÖÆÌå
-    [SerializeField] private float crystalDropChance = 0.7f; // µôÂä¸ÅÂÊ
+    [Header("å†°æ™¶æ‰è½")]
+    [SerializeField] private GameObject iceCrystalPrefab; // å†°æ™¶é¢„åˆ¶ä½“
+    [SerializeField] private float crystalDropChance = 0.7f; // æ‰è½æ¦‚ç‡
 
-    // ËÀÍö×´Ì¬
+    // æ­»äº¡çŠ¶æ€
     private bool isDead = false;
 
-    // ´´½¨¶ÔÏó
+    // åˆ›å»ºå¯¹è±¡
     private Health healthSystem;
     private HealthUI healthUI;
 
     private Animator animator;
 
-    // Animator animator = GameObject.GetComponent<Animator>;
-
     void Start()
     {
-        // ³õÊ¼»¯ÑªÁ¿ÏµÍ³
+        // åˆå§‹åŒ–è¡€é‡ç³»ç»Ÿ
         healthSystem = new Health(initialHealth);
 
-        // ¶©ÔÄËÀÍöÊÂ¼ş
+        // è®¢é˜…æ­»äº¡äº‹ä»¶
         healthSystem.OnDeath += Die;
 
         animator = GetComponent<Animator>();
 
-        // ÊµÀı»¯ÑªÌõUI
+        // å®ä¾‹åŒ–è¡€æ¡UI
         if (healthBarPrefab != null)
         {
             GameObject healthBarObj = Instantiate(
@@ -57,49 +54,47 @@ public class EnemyBaofeng : MonoBehaviour
             healthUI.Initialize(transform, healthSystem);
         }
 
-        // Ìí¼Ó²¢»ñÈ¡ÒôÆµÔ´×é¼ş
+        // æ·»åŠ å¹¶è·å–éŸ³é¢‘æºç»„ä»¶
         audioSource = gameObject.AddComponent<AudioSource>();
-        audioSource.spatialBlend = 0f; // 2D¿Õ¼äÒôĞ§
+        audioSource.spatialBlend = 0f; // 2Dç©ºé—´éŸ³æ•ˆ
         audioSource.rolloffMode = AudioRolloffMode.Logarithmic;
 
-        // ²âÊÔÓÃ£º3Ãëºó¿ªÊ¼ÊÜµ½ÉËº¦
-        InvokeRepeating("ApplyTestDamage", 3f, 1f);
+        // æµ‹è¯•ç”¨ï¼š3ç§’åå¼€å§‹å—åˆ°ä¼¤å®³ (å¦‚æœä½ ä¸éœ€è¦æµ‹è¯•äº†å¯ä»¥æ³¨é‡Šæ‰è¿™ä¸€è¡Œ)
+        // InvokeRepeating("ApplyTestDamage", 3f, 1f);
     }
 
-    // ÊÜÉË²âÊÔ
+    // å—ä¼¤æµ‹è¯•
     private void ApplyTestDamage()
     {
-        //TakeDamage(50f);
-        //UnityEngine.Debug.Log("Enemy²âÊÔÊÜµ½ÉËº¦");
+        // TakeDamage(50f);
     }
 
-    // ÊÕµ½ÉËº¦µÄ·½·¨
+    // æ”¶åˆ°ä¼¤å®³çš„æ–¹æ³•
     public void TakeDamage(float amount)
     {
-        if (isDead) return; // ÒÑËÀÍö²»ÔÙÏìÓ¦ÉËº¦
+        if (isDead) return; // å·²æ­»äº¡ä¸å†å“åº”ä¼¤å®³
         healthSystem.TakeDamage(amount);
-        // ¿ÉÌí¼ÓÉËº¦ÌØĞ§¡¢ÒôĞ§µÈ
     }
 
-    // ËÀÍö´¦Àí£¨ÓÉOnDeathÊÂ¼ş´¥·¢£©
+    // æ­»äº¡å¤„ç†ï¼ˆç”±OnDeathäº‹ä»¶è§¦å‘ï¼‰
     private void Die()
     {
-        if (isDead) return; // ±ÜÃâÖØ¸´´¥·¢
+        if (isDead) return;
         isDead = true;
 
-        // Ôö¼Ó·ÖÊı£¨¾«Ó¢µĞÈË£©
-        CastleGate.ScoreSystem.AddEliteEnemyScore();
+        // â­ ä¿®æ”¹ï¼šé€šçŸ¥å›åˆç®¡ç†å™¨æ•Œäººæ­»äº¡
+        if (GameRoundManager.Instance != null)
+        {
+            GameRoundManager.Instance.OnEnemyKilled();
+        }
 
-        // µôÂä±ù¾§
+        // æ‰è½å†°æ™¶
         if (Random.value <= crystalDropChance && iceCrystalPrefab != null)
         {
             DropIceCrystal();
         }
 
-        // È¡ÏûÊÂ¼ş¶©ÔÄ·ÀÖ¹ÖØ¸´µ÷ÓÃ
         healthSystem.OnDeath -= Die;
-
-        // ËÀÍöÂß¼­
         StartCoroutine(DeathRoutine());
     }
 
@@ -108,87 +103,98 @@ public class EnemyBaofeng : MonoBehaviour
         Vector3 dropPosition = transform.position + Vector3.up * 1f;
         GameObject crystal = Instantiate(iceCrystalPrefab, dropPosition, Quaternion.identity);
 
-        // Ìí¼ÓÆ¯¸¡Ğ§¹û
+        // æ·»åŠ æ¼‚æµ®æ•ˆæœ
         StartCoroutine(FloatingCrystal(crystal));
     }
 
-    // ĞŞ¸Ä²ÎÊıÀàĞÍ
     private IEnumerator FloatingCrystal(GameObject crystal)
     {
-        // ·½·¨Ìå±£³Ö²»±ä
         float floatHeight = 0.5f;
         float floatSpeed = 2f;
         Vector3 startPos = crystal.transform.position;
 
         float timer = 0f;
-        while (timer < 3f)
+        while (timer < 3f && crystal != null)
         {
             crystal.transform.position = startPos + Vector3.up * Mathf.Sin(timer * floatSpeed) * floatHeight;
             timer += Time.deltaTime;
             yield return null;
         }
 
-        Destroy(crystal);
+        if (crystal != null) Destroy(crystal);
     }
 
-    // ËÀÍöĞ­³Ì£¨´¦Àí¶¯»­ºÍÏú»Ù£©
+    // æ­»äº¡åç¨‹ï¼ˆå¤„ç†åŠ¨ç”»å’Œé”€æ¯ï¼‰
     private IEnumerator DeathRoutine()
     {
-        // ±ê¼ÇµĞÈËËÀÍö£¨½ûÓÃAIĞĞÎª£©
-        EnemyAI enemyAI = GetComponent<EnemyAI>();
+        // â­ æ ¸å¿ƒä¿®æ”¹ï¼šè·å– AdvancedEnemyAI å¹¶ç¦ç”¨å®ƒ
+        AdvancedEnemyAI enemyAI = GetComponent<AdvancedEnemyAI>();
         if (enemyAI != null)
         {
+            // è°ƒç”¨ AdvancedEnemyAI ä¸­çš„ MarkAsDead æ–¹æ³•
+            // è¿™ä¼šåœæ­¢å®ƒçš„ç§»åŠ¨ã€æ”»å‡»å’Œå·¡é€»é€»è¾‘
             enemyAI.MarkAsDead();
+
+            // é¢å¤–ä¿é™©ï¼šç¦ç”¨åˆšä½“ç‰©ç†æ¨¡æ‹Ÿï¼Œé˜²æ­¢å°¸ä½“è¢«æ¨åŠ¨
+            Rigidbody rb = GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.velocity = Vector3.zero;
+                rb.isKinematic = true; // è®¾ä¸ºè¿åŠ¨å­¦ï¼Œä¸å†å—ç‰©ç†å½±å“
+            }
+
+            // é¢å¤–ä¿é™©ï¼šç¦ç”¨ç¢°æ’ä½“ï¼Œé˜²æ­¢å°¸ä½“æŒ¡è·¯
+            Collider col = GetComponent<Collider>();
+            if (col != null) col.enabled = false;
         }
 
-        // ´¥·¢ËÀÍö¶¯»­
+        // è§¦å‘æ­»äº¡åŠ¨ç”»
         if (animator != null)
         {
+            // è¿™é‡Œçš„ "die" å¿…é¡»å’Œ Animator é¢æ¿é‡Œçš„ Trigger åå­—ä¸€è‡´
+            // ä¹Ÿå¯ä»¥ä½¿ç”¨ enemyAI.dieAnimParam æ¥ä¿æŒåŒæ­¥ï¼Œä½†ç›´æ¥å†™å­—ç¬¦ä¸²æ›´ç¨³å¦¥
             animator.SetTrigger("die");
-            yield return null; // È·±£¶¯»­´¥·¢Æ÷ÉúĞ§
+            yield return null; // ç¡®ä¿åŠ¨ç”»è§¦å‘å™¨ç”Ÿæ•ˆ
 
-            // Ö±½ÓÊ¹ÓÃ¹Ì¶¨1.6ÃëµÈ´ı
+            // ç­‰å¾…åŠ¨ç”»æ’­æ”¾æ—¶é—´
             yield return new WaitForSeconds(1.6f);
         }
         else
         {
-            // Ã»ÓĞ¶¯»­×é¼şÊ±Ê¹ÓÃ±£µ×µÈ´ı
+            // æ²¡æœ‰åŠ¨ç”»ç»„ä»¶æ—¶ä½¿ç”¨ä¿åº•ç­‰å¾…
             yield return new WaitForSeconds(0.5f);
         }
 
-        // ÔÚµĞÈËÎ»ÖÃÉú³ÉÁ£×Ó±¬Õ¨
+        // åœ¨æ•Œäººä½ç½®ç”Ÿæˆç²’å­çˆ†ç‚¸
         if (explosionParticlePrefab != null)
         {
             GameObject explosion = Instantiate(
                 explosionParticlePrefab,
-                transform.position, // µĞÈËÖĞĞÄµã
+                transform.position,
                 Quaternion.identity
             );
-            Destroy(explosion, 0.5f); // Á£×Ó²¥·Åºó×Ô¶¯Ïú»Ù
+            Destroy(explosion, 0.5f);
         }
 
-        // ²¥·ÅÒôĞ§
+        // æ’­æ”¾éŸ³æ•ˆ
         if (deathSound != null && audioSource != null)
         {
-            // ÔÚµĞÈËÎ»ÖÃ²¥·ÅÒôĞ§
             audioSource.PlayOneShot(deathSound);
-            // µÈ´ıÒôĞ§²¥·ÅÍê±Ï£¨PlayOneShot²»»á×èÈû£¬ËùÒÔÓÃµÈ´ıÊ±¼ä£©
             yield return new WaitForSeconds(deathSound.length);
         }
         else
         {
-            // Èç¹ûÃ»ÓĞÒôĞ§£¬Ê¹ÓÃ±£µ×ÑÓ³Ù
             yield return new WaitForSeconds(0.5f);
         }
 
-        // Ïú»ÙÂß¼­
+        // é”€æ¯é€»è¾‘
         if (healthUI != null) Destroy(healthUI.gameObject);
         Destroy(gameObject);
     }
 
     void OnDestroy()
     {
-        // °²È«È¡ÏûÊÂ¼ş¶©ÔÄ
+        // å®‰å…¨å–æ¶ˆäº‹ä»¶è®¢é˜…
         if (healthSystem != null)
             healthSystem.OnDeath -= Die;
     }

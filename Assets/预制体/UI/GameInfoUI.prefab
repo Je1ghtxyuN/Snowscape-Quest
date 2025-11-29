@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 1329170667576593481}
   - component: {fileID: 1774499810462931858}
   m_Layer: 5
-  m_Name: ScoreUI
+  m_Name: GameInfoUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -85,7 +85,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 1
+  m_PresetInfoIsWorld: 0
 --- !u!114 &708177881781710573
 MonoBehaviour:
   m_ObjectHideFlags: 0

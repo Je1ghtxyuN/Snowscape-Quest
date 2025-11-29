@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
@@ -8,14 +8,17 @@ using System.Collections.Generic;
 [RequireComponent(typeof(XRDirectInteractor))]
 public class SnowballThrower : MonoBehaviour
 {
-    [Header("±ØÌî²ÎÊı")]
+    [Header("å¿…å¡«å‚æ•°")]
     public GameObject snowballPrefab;
     public InputActionReference gripAction;
 
-    [Header("Éú³ÉÎ»ÖÃ")]
-    [SerializeField] private float spawnOffset = 0.1f;
+    [Header("ç”Ÿæˆä½ç½®")]
+    // â­ ä¿®æ”¹ç‚¹ï¼šæ”¹ä¸º Vector3 ä»¥æ”¯æŒä¸Šä¸‹å·¦å³å¾®è°ƒ
+    // å»ºè®®é»˜è®¤å€¼ï¼šx=0, y=-0.05(ç¨å¾®å‘ä¸‹), z=0.15(ç¨å¾®å‘å‰)
+    [Tooltip("ç›¸å¯¹äºæ‰‹æŸ„åæ ‡ç³»çš„åç§»é‡ (X=å·¦å³, Y=ä¸Šä¸‹, Z=å‰å)")]
+    [SerializeField] private Vector3 spawnOffset = new Vector3(0, -0.05f, 0.15f);
 
-    [Header("Å×ÖÀ²ÎÊı")]
+    [Header("æŠ›æ·å‚æ•°")]
     [SerializeField] private float throwForceMultiplier = 1.2f;
     [SerializeField] private float gravityScale = 0.5f;
     [SerializeField] private int velocitySmoothingFrames = 10;
@@ -30,7 +33,6 @@ public class SnowballThrower : MonoBehaviour
     {
         interactor = GetComponent<XRDirectInteractor>();
 
-        // È·±£ gripAction ²»Îª null
         if (gripAction != null && gripAction.action != null)
         {
             gripAction.action.Enable();
@@ -39,12 +41,11 @@ public class SnowballThrower : MonoBehaviour
         }
         else
         {
-            Debug.LogError("Grip Action Î´ÉèÖÃ»òÎŞĞ§!");
+            Debug.LogError("Grip Action æœªè®¾ç½®æˆ–æ— æ•ˆ!");
         }
 
         previousPosition = transform.position;
 
-        // ³õÊ¼»¯ËÙ¶ÈÀúÊ·¶ÓÁĞ
         for (int i = 0; i < velocitySmoothingFrames; i++)
         {
             velocityHistory.Enqueue(Vector3.zero);
@@ -53,21 +54,19 @@ public class SnowballThrower : MonoBehaviour
 
     private void Update()
     {
-        // ¼ÆËã¿ØÖÆÆ÷ËÙ¶È
+        if (Time.deltaTime <= Mathf.Epsilon || Time.timeScale == 0f) return;
+
         Vector3 currentVelocity = (transform.position - previousPosition) / Time.deltaTime;
         previousPosition = transform.position;
 
-        // ¸üĞÂËÙ¶ÈÀúÊ·¶ÓÁĞ
         velocityHistory.Enqueue(currentVelocity);
         if (velocityHistory.Count > velocitySmoothingFrames)
         {
             velocityHistory.Dequeue();
         }
 
-        // ¼ÆËãÆ½»¬ËÙ¶È£¨ºöÂÔ×îºó¼¸Ö¡µÄ²»ÎÈ¶¨¹ì¼££©
         smoothedVelocity = CalculateSmoothedVelocity();
 
-        // ÇåÀíÒÑÏú»ÙµÄÑ©ÇòÒıÓÃ
         for (int i = activeSnowballs.Count - 1; i >= 0; i--)
         {
             if (activeSnowballs[i] == null)
@@ -77,13 +76,10 @@ public class SnowballThrower : MonoBehaviour
         }
     }
 
-    // ¼ÆËãÆ½»¬ËÙ¶ÈµÄ·½·¨
     private Vector3 CalculateSmoothedVelocity()
     {
         Vector3 sum = Vector3.zero;
         int count = 0;
-
-        // ¼ÆËãÇ°80%Ö¡µÄÆ½¾ùËÙ¶È£¬ºöÂÔ×îºó20%µÄ²»ÎÈ¶¨¹ì¼£
         int framesToSkip = Mathf.FloorToInt(velocitySmoothingFrames * 0.1f);
         int framesToUse = velocitySmoothingFrames - framesToSkip;
 
@@ -95,7 +91,6 @@ public class SnowballThrower : MonoBehaviour
                 count++;
             }
         }
-
         return count > 0 ? sum / count : Vector3.zero;
     }
 
@@ -106,36 +101,39 @@ public class SnowballThrower : MonoBehaviour
             gripAction.action.performed -= OnGripPressed;
             gripAction.action.canceled -= OnGripReleased;
         }
+
+        activeSnowballs.Clear();
+        velocityHistory.Clear();
     }
 
     private void OnGripPressed(InputAction.CallbackContext context)
     {
+        if (Time.timeScale == 0f) return;
+
         if (snowballPrefab != null)
         {
-            // ÊµÀı»¯Ñ©Çò
-            Vector3 spawnPos = transform.position + transform.forward * spawnOffset;
+            // â­ ä¿®æ”¹ç‚¹ï¼šä½¿ç”¨ TransformPoint å°†å±€éƒ¨åæ ‡è½¬ä¸ºä¸–ç•Œåæ ‡
+            // è¿™æ ·ä½ å¯ä»¥åœ¨ Inspector é‡Œè°ƒæ•´ X/Y/Z åç§»
+            Vector3 spawnPos = transform.TransformPoint(spawnOffset);
+
             GameObject snowball = Instantiate(snowballPrefab, spawnPos, Quaternion.identity);
             activeSnowballs.Add(snowball);
 
-            // »ñÈ¡»òÌí¼Ó×¥È¡×é¼ş
             XRGrabInteractable grabInteractable = snowball.GetComponent<XRGrabInteractable>();
             if (grabInteractable == null)
             {
                 grabInteractable = snowball.AddComponent<XRGrabInteractable>();
             }
 
-            // ÅäÖÃ×¥È¡ÊôĞÔ
             grabInteractable.throwOnDetach = false;
             grabInteractable.selectExited.AddListener((args) => OnSnowballReleased(args, snowball));
 
-            // È·±£¸ÕÌåÉèÖÃÕıÈ·
             Rigidbody rb = snowball.GetComponent<Rigidbody>();
             if (rb != null)
             {
                 rb.isKinematic = false;
                 rb.useGravity = false;
 
-                // ½ûÓÃÑ©ÇòÓë¿ØÖÆÆ÷Ö®¼äµÄÅö×²
                 Collider snowballCollider = snowball.GetComponent<Collider>();
                 if (snowballCollider != null)
                 {
@@ -146,7 +144,6 @@ public class SnowballThrower : MonoBehaviour
                 }
             }
 
-            // ¿ªÊ¼×¥È¡½»»¥
             if (interactor != null)
             {
                 interactor.StartManualInteraction(grabInteractable as IXRSelectInteractable);
@@ -156,7 +153,6 @@ public class SnowballThrower : MonoBehaviour
 
     private void OnGripReleased(InputAction.CallbackContext context)
     {
-        // ÊÍ·ÅËùÓĞµ±Ç°±»×¥È¡µÄÑ©Çò
         if (interactor != null && interactor.hasSelection)
         {
             interactor.EndManualInteraction();
@@ -165,26 +161,24 @@ public class SnowballThrower : MonoBehaviour
 
     private void OnSnowballReleased(SelectExitEventArgs args, GameObject snowball)
     {
-        // È·±£Ñ©Çò¶ÔÏóÈÔÈ»´æÔÚ
         if (snowball == null) return;
 
-        // ÆôÓÃÖØÁ¦²¢Ó¦ÓÃÆ½»¬ºóµÄËÙ¶È
         Rigidbody rb = snowball.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            // Ê¹ÓÃÆ½»¬ºóµÄËÙ¶È£¬ºöÂÔ×îºóµÄ²»ÎÈ¶¨¶¶¶¯
+            if (float.IsNaN(smoothedVelocity.x) || float.IsInfinity(smoothedVelocity.x))
+            {
+                smoothedVelocity = Vector3.zero;
+            }
+
             Vector3 throwVelocity = smoothedVelocity * throwForceMultiplier;
             rb.velocity = throwVelocity;
-
-            // Ìí¼ÓÒ»Ğ©Ğı×ªĞ§¹û£¬Ê¹Å×ÎïÏß¸ü×ÔÈ»
             rb.angularVelocity = Vector3.Cross(transform.forward, throwVelocity).normalized *
                                 throwVelocity.magnitude * 0.1f;
 
-            // Ìí¼Ó×Ô¶¨ÒåÖØÁ¦×é¼ş
             SnowballGravity snowballGravity = snowball.AddComponent<SnowballGravity>();
             snowballGravity.gravityScale = gravityScale;
 
-            // ÖØĞÂÆôÓÃÑ©ÇòÓëÆäËûÎïÌåµÄÅö×²
             Collider snowballCollider = snowball.GetComponent<Collider>();
             if (snowballCollider != null)
             {
@@ -195,12 +189,10 @@ public class SnowballThrower : MonoBehaviour
             }
         }
 
-        // ´Ó»î¶¯ÁĞ±íÖĞÒÆ³ı
         activeSnowballs.Remove(snowball);
     }
 }
 
-// ×Ô¶¨ÒåÖØÁ¦×é¼ş
 public class SnowballGravity : MonoBehaviour
 {
     public float gravityScale = 0.5f;
@@ -209,13 +201,11 @@ public class SnowballGravity : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        // ½ûÓÃÄ¬ÈÏÖØÁ¦£¬ÎÒÃÇ½«×Ô¼º´¦Àí
         rb.useGravity = false;
     }
 
     void FixedUpdate()
     {
-        // Ó¦ÓÃ×Ô¶¨ÒåÖØÁ¦
         if (rb != null)
         {
             rb.AddForce(Physics.gravity * gravityScale, ForceMode.Acceleration);

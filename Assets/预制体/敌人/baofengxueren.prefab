@@ -646,6 +646,7 @@ GameObject:
   - component: {fileID: 8417962790284963701}
   - component: {fileID: 5985300570024987437}
   - component: {fileID: 6116751652129915146}
+  - component: {fileID: 977966983891588148}
   m_Layer: 0
   m_Name: baofengxueren
   m_TagString: Enemy
@@ -786,12 +787,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3af3bb4499ee776448a616815d9b3593, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  patrolRadius: 20
   patrolSpeed: 3
+  chaseSpeed: 5
+  rotationSpeed: 10
+  patrolRadius: 20
   waitTime: 1
-  rotationSpeed: 5
-  detectionRange: 10
+  stuckCheckInterval: 0.5
+  minMoveDistance: 0.1
+  changeDirectionCooldown: 1
+  detectionRange: 25
   attackRange: 7
+  losePlayerRange: 40
+  memoryDuration: 3
   playerLayer:
     serializedVersion: 2
     m_Bits: 128
@@ -799,14 +806,41 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   snowballPrefab: {fileID: 8584692561766056644, guid: 99ca4b873ebd7314ca3833bd0c0bc8c9, type: 3}
-  firePoint: {fileID: 0}
+  firePoint: {fileID: 8296336835783816297}
   attackCooldown: 2
-  projectileSpeed: 10
+  launchAngle: 25
   animator: {fileID: 6989399055150312925}
   walkAnimParam: isWalking
   attackAnimParam: Attack
   dieAnimParam: die
   isDead: 0
+--- !u!54 &977966983891588148
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3422242025731796399}
+  serializedVersion: 4
+  m_Mass: 5
+  m_Drag: 1
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 80
+  m_CollisionDetection: 0
 --- !u!1 &3513593233254079888
 GameObject:
   m_ObjectHideFlags: 0
