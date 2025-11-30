@@ -94,41 +94,17 @@ public class EnemyHealth : MonoBehaviour
             //GameRoundManager.Instance.OnEnemyKilled();//普通雪人不计入
         }
 
+        // 掉落逻辑修改：只负责生成，不负责控制移动
         if (Random.value <= crystalDropChance && iceCrystalPrefab != null)
         {
-            DropIceCrystal();
+            // 生成位置：在怪物的中心偏上一点
+            Vector3 spawnPos = transform.position + Vector3.up * 0.8f;
+            Instantiate(iceCrystalPrefab, spawnPos, Quaternion.identity);
         }
 
         StartCoroutine(DeathRoutine());
     }
 
-    private void DropIceCrystal()
-    {
-        Vector3 dropPosition = transform.position + Vector3.up * 1f;
-        GameObject crystal = Instantiate(iceCrystalPrefab, dropPosition, Quaternion.identity);
-
-        // 添加漂浮效果
-        StartCoroutine(FloatingCrystal(crystal));
-    }
-
-    // 修改参数类型
-    private IEnumerator FloatingCrystal(GameObject crystal)
-    {
-        // 方法体保持不变
-        float floatHeight = 0.5f;
-        float floatSpeed = 2f;
-        Vector3 startPos = crystal.transform.position;
-
-        float timer = 0f;
-        while (timer < 3f)
-        {
-            crystal.transform.position = startPos + Vector3.up * Mathf.Sin(timer * floatSpeed) * floatHeight;
-            timer += Time.deltaTime;
-            yield return null;
-        }
-
-        Destroy(crystal);
-    }
 
     // 死亡协程（处理动画和销毁）
     private IEnumerator DeathRoutine()

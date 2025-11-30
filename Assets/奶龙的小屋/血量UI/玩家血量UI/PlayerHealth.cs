@@ -1,12 +1,12 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 
 public class PlayerHealth : MonoBehaviour
 {
+    [Header("UIå¼•ç”¨")]
     [SerializeField] private GameObject fixedHealthBarPrefab;
-    [SerializeField] private GameObject deathUIPrefab; // ĞÂÔöËÀÍöUIÔ¤ÖÆÌå
-    [SerializeField] private Material deathFilterMaterial; // ĞÂÔöËÀÍöÂË¾µ²ÄÖÊ(ºìÉ«»òºÚ°×)
-    [SerializeField] private float deathTimeScale = 0.3f; // ËÀÍöÊ±µÄÊ±¼äËõ·Å
+    [SerializeField] private GameObject deathUIPrefab;
+    [SerializeField] private float deathTimeScale = 0.3f;
     [SerializeField] private GameObject leftHandController;
 
     private Health healthSystem;
@@ -15,16 +15,28 @@ public class PlayerHealth : MonoBehaviour
     private GameObject deathUIInstance;
     private bool isDead = false;
 
+    // ç‰¹æ•ˆç®¡ç†å™¨å¼•ç”¨
+    private VRLensEffectManager lensEffectManager;
+
     void Start()
     {
         healthSystem = new Health(100f);
         healthSystem.OnDeath += Die;
+        // æ³¨å†Œè¡€é‡å˜åŒ–
+        healthSystem.OnHealthChanged += OnHealthChanged;
 
         vrCamera = Camera.main;
         if (vrCamera == null)
         {
             Debug.LogError("Main Camera not found");
             return;
+        }
+
+        // â­ è‡ªåŠ¨æŸ¥æ‰¾å¹¶æŠ¥é”™æç¤º
+        lensEffectManager = FindObjectOfType<VRLensEffectManager>();
+        if (lensEffectManager == null)
+        {
+            Debug.LogWarning("âš ï¸ PlayerHealth: åœºæ™¯ä¸­æ²¡æ‰¾åˆ° VRLensEffectManagerï¼Œä½è¡€é‡ç‰¹æ•ˆå°†ä¸æ˜¾ç¤ºï¼");
         }
 
         CreateHealthBar();
@@ -47,9 +59,25 @@ public class PlayerHealth : MonoBehaviour
         healthUI.Initialize(healthSystem);
     }
 
+    // â­ æ ¸å¿ƒï¼šè¡€é‡å˜åŒ–å›è°ƒ
+    private void OnHealthChanged()
+    {
+        if (lensEffectManager != null)
+        {
+            float percent = healthSystem.GetHealthPercentage();
+            // Debug.Log($"å½“å‰è¡€é‡ç™¾åˆ†æ¯”: {percent}"); // è°ƒè¯•ç”¨
+            lensEffectManager.UpdateHealthEffect(percent);
+        }
+    }
+
     public void TakeDamage(float amount)
     {
-        if (!isDead) healthSystem.TakeDamage(amount);
+        if (!isDead)
+        {
+            healthSystem.TakeDamage(amount);
+            // è¿™é‡Œä¸éœ€è¦æ‰‹åŠ¨è°ƒç”¨ OnHealthChangedï¼Œå› ä¸ºä¸Šé¢å·²ç»è®¢é˜…äº† healthSystem.OnHealthChanged
+            // å‰ææ˜¯ä½ çš„ Health.cs åœ¨ TakeDamage é‡Œæ­£ç¡® Invoke äº†äº‹ä»¶
+        }
     }
 
     private void Die()
@@ -57,50 +85,37 @@ public class PlayerHealth : MonoBehaviour
         if (isDead) return;
         isDead = true;
 
+        var thrower = GetComponentInChildren<SnowballThrower>();
+        if (thrower != null) thrower.canThrow = false;
 
-        // ÏÔÊ¾ËÀÍöUI
+        var snowmanManager = FindObjectOfType<AdvancedSnowmanManager>();
+        if (snowmanManager != null)
+        {
+            snowmanManager.ClearAllSnowmen();
+        }
+
         ShowDeathUI();
-
-        // ·ÅÂıÓÎÏ·Ê±¼ä
         Time.timeScale = deathTimeScale;
 
-        // È¡ÏûÊÂ¼ş¶©ÔÄ
         healthSystem.OnDeath -= Die;
+        healthSystem.OnHealthChanged -= OnHealthChanged;
     }
 
     public void Heal(float amount)
     {
         if (!isDead)
         {
-            // ¼ÙÉèHealthÀàÓĞHeal·½·¨£¬Èç¹ûÃ»ÓĞĞèÒªÌí¼Ó
             healthSystem.Heal(amount);
         }
     }
 
+    // ... [ShowDeathUI å’Œ DisableLeftHandController ä¿æŒä¸å˜]
     private void ShowDeathUI()
     {
-        // ÊµÀı»¯ËÀÍöUI
         deathUIInstance = Instantiate(
             deathUIPrefab,
             vrCamera.transform.position + vrCamera.transform.forward * 1.5f + (-vrCamera.transform.up) * 1f,
             vrCamera.transform.rotation
         );
-
-        // µ÷ÕûUIÎ»ÖÃºÍ´óĞ¡
-        //deathUIInstance.transform.localScale = Vector3.one * 0.003f;
-
-    }
-
-    private void DisableLeftHandController()
-    {
-        if (leftHandController != null)
-        {
-            // ½ûÓÃ¿ØÖÆÆ÷ÓÎÏ·¶ÔÏó
-            leftHandController.SetActive(false);
-        }
-        else
-        {
-            Debug.LogWarning("Left hand controller reference not set in PlayerHealth");
-        }
     }
 }

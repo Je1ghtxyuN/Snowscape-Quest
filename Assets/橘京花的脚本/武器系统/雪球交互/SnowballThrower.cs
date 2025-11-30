@@ -13,8 +13,6 @@ public class SnowballThrower : MonoBehaviour
     public InputActionReference gripAction;
 
     [Header("生成位置")]
-    // ⭐ 修改点：改为 Vector3 以支持上下左右微调
-    // 建议默认值：x=0, y=-0.05(稍微向下), z=0.15(稍微向前)
     [Tooltip("相对于手柄坐标系的偏移量 (X=左右, Y=上下, Z=前后)")]
     [SerializeField] private Vector3 spawnOffset = new Vector3(0, -0.05f, 0.15f);
 
@@ -28,6 +26,8 @@ public class SnowballThrower : MonoBehaviour
     private Queue<Vector3> velocityHistory = new Queue<Vector3>();
     private Vector3 previousPosition;
     private Vector3 smoothedVelocity;
+
+    public bool canThrow = true;
 
     private void Awake()
     {
@@ -102,13 +102,13 @@ public class SnowballThrower : MonoBehaviour
             gripAction.action.canceled -= OnGripReleased;
         }
 
-        activeSnowballs.Clear();
-        velocityHistory.Clear();
+        //activeSnowballs.Clear();
+        //velocityHistory.Clear();
     }
 
     private void OnGripPressed(InputAction.CallbackContext context)
     {
-        if (Time.timeScale == 0f) return;
+        if (Time.timeScale == 0f || !canThrow) return;
 
         if (snowballPrefab != null)
         {

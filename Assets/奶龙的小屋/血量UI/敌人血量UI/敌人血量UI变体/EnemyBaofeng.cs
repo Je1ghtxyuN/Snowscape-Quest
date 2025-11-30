@@ -88,41 +88,18 @@ public class EnemyBaofeng : MonoBehaviour
             GameRoundManager.Instance.OnEnemyKilled();
         }
 
-        // 掉落冰晶
+        // 掉落逻辑修改
         if (Random.value <= crystalDropChance && iceCrystalPrefab != null)
         {
-            DropIceCrystal();
+            // 精英怪可能比较高大，生成位置再高一点，防止卡在身体里
+            Vector3 spawnPos = transform.position + Vector3.up * 0.8f;
+            Instantiate(iceCrystalPrefab, spawnPos, Quaternion.identity);
         }
 
         healthSystem.OnDeath -= Die;
         StartCoroutine(DeathRoutine());
     }
 
-    private void DropIceCrystal()
-    {
-        Vector3 dropPosition = transform.position + Vector3.up * 1f;
-        GameObject crystal = Instantiate(iceCrystalPrefab, dropPosition, Quaternion.identity);
-
-        // 添加漂浮效果
-        StartCoroutine(FloatingCrystal(crystal));
-    }
-
-    private IEnumerator FloatingCrystal(GameObject crystal)
-    {
-        float floatHeight = 0.5f;
-        float floatSpeed = 2f;
-        Vector3 startPos = crystal.transform.position;
-
-        float timer = 0f;
-        while (timer < 3f && crystal != null)
-        {
-            crystal.transform.position = startPos + Vector3.up * Mathf.Sin(timer * floatSpeed) * floatHeight;
-            timer += Time.deltaTime;
-            yield return null;
-        }
-
-        if (crystal != null) Destroy(crystal);
-    }
 
     // 死亡协程（处理动画和销毁）
     private IEnumerator DeathRoutine()

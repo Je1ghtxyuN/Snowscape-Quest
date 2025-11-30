@@ -35,37 +35,28 @@ public class PlayerWeaponController : MonoBehaviour
         if (Time.timeScale == 0f)
         {
             // 隐藏所有武器
-            if (iceSwordObject != null && iceSwordObject.activeSelf)
-            {
-                iceSwordObject.SetActive(false);
-            }
-            if (snowballThrower != null && snowballThrower.enabled)
-            {
-                snowballThrower.enabled = false;
-            }
+            if (iceSwordObject != null) iceSwordObject.SetActive(false);
+            // 暂停时禁止投掷
+            if (snowballThrower != null) snowballThrower.canThrow = false;
         }
         // 2. 如果游戏正常进行 (Time.timeScale > 0)
         else
         {
-            // 根据当前模式决定谁显谁隐
             if (isSwordActive)
             {
-                // 剑模式：显示剑，禁用雪球
                 if (iceSwordObject != null && !iceSwordObject.activeSelf)
                     iceSwordObject.SetActive(true);
 
-                // ⭐ 修复点：在这里强制禁用雪球脚本
-                if (snowballThrower != null && snowballThrower.enabled)
-                    snowballThrower.enabled = false;
+                // ⭐ 剑模式：禁止投掷
+                if (snowballThrower != null) snowballThrower.canThrow = false;
             }
             else
             {
-                // 雪球模式：隐藏剑，启用雪球
                 if (iceSwordObject != null && iceSwordObject.activeSelf)
                     iceSwordObject.SetActive(false);
 
-                if (snowballThrower != null && !snowballThrower.enabled)
-                    snowballThrower.enabled = true;
+                // ⭐ 雪球模式：允许投掷
+                if (snowballThrower != null) snowballThrower.canThrow = true;
             }
         }
     }

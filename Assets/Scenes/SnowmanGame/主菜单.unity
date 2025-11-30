@@ -7117,6 +7117,8 @@ MonoBehaviour:
   healthBarPrefab: {fileID: 5429467087999930779, guid: 33b32447657d9074d965765de8ecfbf6, type: 3}
   explosionParticlePrefab: {fileID: 0}
   deathSound: {fileID: 0}
+  iceCrystalPrefab: {fileID: 0}
+  crystalDropChance: 0.7
 --- !u!4 &1339431187759302840
 Transform:
   m_ObjectHideFlags: 0
@@ -11788,7 +11790,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fixedHealthBarPrefab: {fileID: 1698018954499368992, guid: cc45fbf834a226644880f94b38984cda, type: 3}
   deathUIPrefab: {fileID: 0}
-  deathFilterMaterial: {fileID: 0}
   deathTimeScale: 0.3
   leftHandController: {fileID: 0}
 --- !u!114 &3536990402637916905
@@ -13335,7 +13336,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2102386574927355069, guid: fd607d96d2fc9cd4896fde32175821a0, type: 3}
       propertyPath: m_text
-      value: v1.0.0
+      value: v2.0.0
       objectReference: {fileID: 0}
     - target: {fileID: 3103288578446506875, guid: fd607d96d2fc9cd4896fde32175821a0, type: 3}
       propertyPath: m_Name

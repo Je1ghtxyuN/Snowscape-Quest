@@ -98,6 +98,11 @@ public class GameRoundManager : MonoBehaviour
         Debug.Log("🟢 回合结束，进入休息/升级阶段");
         currentState = GameState.UpgradePhase;
 
+        if (spawner != null)
+        {
+            spawner.ClearAllSnowmen();
+        }
+
         // 如果还有下一回合，显示升级UI
         if (currentRoundIndex < rounds.Count - 1)
         {

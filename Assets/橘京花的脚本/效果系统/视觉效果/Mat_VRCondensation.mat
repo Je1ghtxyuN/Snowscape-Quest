@@ -29,6 +29,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _AlphaMultiplier: 2
     - _BlurAmount: 0.02
     - _Distortion: 0.05
     - _Intensity: 0

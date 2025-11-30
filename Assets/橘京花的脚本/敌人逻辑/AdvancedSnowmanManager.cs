@@ -146,12 +146,25 @@ public class AdvancedSnowmanManager : MonoBehaviour
         }
         return true;
     }
-
+        
     private void ClearDeadSnowmen()
     {
         for (int i = currentSnowmen.Count - 1; i >= 0; i--)
         {
             if (currentSnowmen[i] == null) currentSnowmen.RemoveAt(i);
         }
+    }
+
+    public void ClearAllSnowmen()
+    {
+        for (int i = currentSnowmen.Count - 1; i >= 0; i--)
+        {
+            if (currentSnowmen[i] != null)
+            {
+                Destroy(currentSnowmen[i]);
+            }
+        }
+        currentSnowmen.Clear();
+        Debug.Log("🧹 已清空所有雪人");
     }
 }
