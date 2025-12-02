@@ -1141,7 +1141,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fixedHealthBarPrefab: {fileID: 1698018954499368992, guid: cc45fbf834a226644880f94b38984cda, type: 3}
   deathUIPrefab: {fileID: 0}
-  deathFilterMaterial: {fileID: 0}
   deathTimeScale: 0.3
   leftHandController: {fileID: 0}
 --- !u!114 &3847760366095690497
@@ -1226,12 +1225,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f6c818bea74ba448b59ebdcf8ad7865, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpButton: 6
-  jumpForceMultiplier: 1
-  groundCheckDistance: 0.1
-  groundLayer:
-    serializedVersion: 2
-    m_Bits: 4294967295
+  jumpInputSource:
+    m_UseReference: 0
+    m_Action:
+      m_Name: 
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: 50903f3e-2800-4fec-833b-1850b6da12bd
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 0}
+  allowDoubleJump: 0
+  jumpCooldown: 0.5
 --- !u!114 &7903517893175553269
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1258,7 +1265,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c43c8d95f323c924dbdc4d033c46879d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scoreUIPrefab: {fileID: 4862823480734786970, guid: e01a3e9647003f74a8a402f46620a593, type: 3}
+  uiPrefab: {fileID: 0}
   uiOffset: {x: 0, y: 0.3, z: 0}
   uiScale: 0.002
 --- !u!114 &4981125943194325849
@@ -1459,10 +1466,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowballPrefab: {fileID: 8584692561766056644, guid: 99ca4b873ebd7314ca3833bd0c0bc8c9, type: 3}
   gripAction: {fileID: 4324797343224664871, guid: 761bf6a792a0c114fa0953a9b458c7e4, type: 3}
-  spawnOffset: 0.1
+  spawnOffset: {x: 0, y: -0.05, z: 0.15}
   throwForceMultiplier: 1.5
   gravityScale: 0.5
   velocitySmoothingFrames: 10
+  canThrow: 1
 --- !u!4 &3697705406963678195 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7277802326798953675, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}
