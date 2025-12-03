@@ -1228,7 +1228,7 @@ MonoBehaviour:
   jumpInputSource:
     m_UseReference: 0
     m_Action:
-      m_Name: 
+      m_Name: Jump Input Source
       m_Type: 0
       m_ExpectedControlType: 
       m_Id: 50903f3e-2800-4fec-833b-1850b6da12bd
@@ -1237,8 +1237,10 @@ MonoBehaviour:
       m_SingletonActionBindings: []
       m_Flags: 0
     m_Reference: {fileID: 0}
-  allowDoubleJump: 0
   jumpCooldown: 0.5
+  _isPressed: 0
+  _isGrounded: 0
+  _isCooldownReady: 0
 --- !u!114 &7903517893175553269
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1280,12 +1282,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb3f37c6b75ae704496bb38ad74fd585, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  iceCrystalNormalMap: {fileID: 0}
-  iceCrystalParticles: {fileID: 0}
-  collectSound: {fileID: 0}
-  healAmount: 20
+  playerHealth: {fileID: 0}
+  audioSource: {fileID: 0}
+  iceNormalMap: {fileID: 0}
+  frostColor: {r: 0.6, g: 0.8, b: 1, a: 1}
+  iceSmoothness: 0.85
+  iceEmissionColor: {r: 0, g: 0.2, b: 0.5, a: 1}
   effectDuration: 5
-  skinPartName: Skin
+  transitionSpeed: 2
+  collectSound: {fileID: 0}
+  iceCrystalParticles: {fileID: 0}
+  healAmount: 20
+  targetRendererName: Renderer_Body
 --- !u!4 &3697705405439712145 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7277802327414017193, guid: 77e7c27b2c5525e4aa8cc9f99d654486, type: 3}

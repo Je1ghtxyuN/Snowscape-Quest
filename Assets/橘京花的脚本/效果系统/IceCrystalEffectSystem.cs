@@ -1,148 +1,204 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections;
 
 public class IceCrystalEffectSystem : MonoBehaviour
 {
-    [Header("±ù¾§Ğ§¹ûÉèÖÃ")]
-    [SerializeField] private Texture2D iceCrystalNormalMap; // ±ù¾§·¨ÏßÌùÍ¼
-    [SerializeField] private ParticleSystem iceCrystalParticles; // ±ù¾§Á£×ÓĞ§¹û
-    [SerializeField] private AudioClip collectSound; // ÊÕ¼¯ÒôĞ§
-    [SerializeField] private float healAmount = 20f; // Ã¿´ÎÊÕ¼¯»Ö¸´ÑªÁ¿
-    [SerializeField] private float effectDuration = 5f; // Ğ§¹û³ÖĞøÊ±¼ä
-    [SerializeField] private string skinPartName = "Skin"; // Æ¤·ô²¿·Ö×ÓÎïÌåµÄÃû³Æ
+    [Header("æ ¸å¿ƒè®¾ç½®")]
+    [SerializeField] private PlayerHealth playerHealth;
+    [SerializeField] private AudioSource audioSource;
 
-    private PlayerHealth playerHealth;
-    private Renderer skinRenderer; // Æ¤·ô²¿·ÖµÄäÖÈ¾Æ÷
-    private Material originalSkinMaterial; // Æ¤·ôÔ­Ê¼²ÄÖÊ
-    private Material iceCrystalMaterial; // ±ù¾§²ÄÖÊÊµÀı
-    private AudioSource audioSource;
-    private bool isEffectActive = false;
+    [Header("è§†è§‰å‚æ•°")]
+    [SerializeField] private Texture2D iceNormalMap;
+    [SerializeField] private Color frostColor = new Color(0.6f, 0.8f, 1f);
+
+    [Tooltip("ç»“å†°æ—¶çš„å¹³æ»‘åº¦ (å¯¹äºglTFæè´¨ï¼Œä¼šè‡ªåŠ¨è½¬æ¢ä¸ºä½ç²—ç³™åº¦)")]
+    [Range(0f, 1f)][SerializeField] private float iceSmoothness = 0.85f;
+
+    [SerializeField] private Color iceEmissionColor = new Color(0, 0.2f, 0.5f);
+
+    [Header("åŠ¨ç”»å‚æ•°")]
+    [SerializeField] private float effectDuration = 5f;
+    [SerializeField] private float transitionSpeed = 2f;
+
+    [Header("å…¶ä»–")]
+    [SerializeField] private AudioClip collectSound;
+    [SerializeField] private ParticleSystem iceCrystalParticles;
+    [SerializeField] private float healAmount = 20f;
+
+    [SerializeField] private string targetRendererName = "Renderer_Body";
+
+    // å†…éƒ¨å˜é‡
+    private Renderer targetRenderer;
+    private Material runtimeMaterial;
+    private Coroutine effectCoroutine;
     private int crystalCount = 0;
+
+    // è®°å½•åŸå§‹å€¼
+    private Color originalBaseColor;
+    private float originalVal; // å¯èƒ½æ˜¯å¹³æ»‘åº¦ï¼Œä¹Ÿå¯èƒ½æ˜¯ç²—ç³™åº¦
+    private Texture originalNormalMap;
+    private Color originalEmissionColor;
+
+    // å±æ€§åç¼“å­˜ (è‡ªåŠ¨é€‚é…)
+    private string nameColor;
+    private string nameSmoothness; // æˆ–è€…æ˜¯ Roughness
+    private string nameNormal;
+    private string nameEmission;
+    private bool isRoughnessMode = false; // æ ‡è®°æ˜¯å¦ä¸ºç²—ç³™åº¦æ¨¡å¼ (glTF)
 
     void Start()
     {
-        playerHealth = GetComponent<PlayerHealth>();
-        audioSource = GetComponent<AudioSource>();
+        if (playerHealth == null) playerHealth = GetComponent<PlayerHealth>();
+        if (audioSource == null) audioSource = GetComponent<AudioSource>();
 
-        // ²éÕÒÆ¤·ô²¿·ÖµÄ×ÓÎïÌå
-        FindSkinRenderer();
+        InitializeMaterialSystem();
+    }
 
-        if (skinRenderer != null)
+    void InitializeMaterialSystem()
+    {
+        Transform foundObj = FindDeepChild(transform, targetRendererName);
+        if (foundObj != null) targetRenderer = foundObj.GetComponent<Renderer>();
+        else targetRenderer = GetComponentInChildren<SkinnedMeshRenderer>();
+
+        if (targetRenderer != null)
         {
-            originalSkinMaterial = skinRenderer.material;
-            // ´´½¨±ù¾§²ÄÖÊÊµÀı
-            CreateIceCrystalMaterial();
+            runtimeMaterial = targetRenderer.material;
+            Debug.Log($"[IceEffect] æ­£åœ¨é€‚é…æè´¨: {runtimeMaterial.shader.name}");
+
+            // --- 1. è‡ªåŠ¨åŒ¹é…é¢œè‰²å±æ€§ ---
+            if (runtimeMaterial.HasProperty("baseColorFactor")) nameColor = "baseColorFactor"; // glTF
+            else if (runtimeMaterial.HasProperty("_BaseColor")) nameColor = "_BaseColor"; // URP
+            else nameColor = "_Color"; // Built-in
+
+            if (runtimeMaterial.HasProperty(nameColor))
+                originalBaseColor = runtimeMaterial.GetColor(nameColor);
+            else
+                Debug.LogError("âŒ æ— æ³•è¯†åˆ«é¢œè‰²å±æ€§åï¼");
+
+            // --- 2. è‡ªåŠ¨åŒ¹é…å¹³æ»‘åº¦/ç²—ç³™åº¦ ---
+            if (runtimeMaterial.HasProperty("roughnessFactor"))
+            {
+                nameSmoothness = "roughnessFactor"; // glTF
+                isRoughnessMode = true;
+                Debug.Log("   -> æ£€æµ‹åˆ° glTF æè´¨ï¼Œä½¿ç”¨ç²—ç³™åº¦ (Roughness) æ¨¡å¼");
+            }
+            else if (runtimeMaterial.HasProperty("_Roughness"))
+            {
+                nameSmoothness = "_Roughness";
+                isRoughnessMode = true;
+            }
+            else if (runtimeMaterial.HasProperty("_Smoothness"))
+            {
+                nameSmoothness = "_Smoothness"; // URP
+                isRoughnessMode = false;
+            }
+
+            if (!string.IsNullOrEmpty(nameSmoothness))
+                originalVal = runtimeMaterial.GetFloat(nameSmoothness);
+
+            // --- 3. è‡ªåŠ¨åŒ¹é…æ³•çº¿ ---
+            if (runtimeMaterial.HasProperty("normalTexture")) nameNormal = "normalTexture"; // glTF
+            else nameNormal = "_BumpMap"; // Unity Standard
+
+            if (runtimeMaterial.HasProperty(nameNormal))
+                originalNormalMap = runtimeMaterial.GetTexture(nameNormal);
+
+            // --- 4. è‡ªåŠ¨åŒ¹é…è‡ªå‘å…‰ ---
+            if (runtimeMaterial.HasProperty("emissiveFactor")) nameEmission = "emissiveFactor"; // glTF
+            else nameEmission = "_EmissionColor";
+
+            if (runtimeMaterial.HasProperty(nameEmission))
+                originalEmissionColor = runtimeMaterial.GetColor(nameEmission);
         }
         else
         {
-            Debug.LogWarning("Î´ÕÒµ½Æ¤·ô²¿·ÖµÄäÖÈ¾Æ÷£¬Çë¼ì²é×ÓÎïÌåÃû³ÆÉèÖÃ: " + skinPartName);
+            Debug.LogError("[IceEffect] âŒ æœªæ‰¾åˆ° Renderer");
         }
     }
 
-    // ²éÕÒÆ¤·ô²¿·ÖµÄäÖÈ¾Æ÷
-    private void FindSkinRenderer()
-    {
-        Transform skinTransform = transform.Find(skinPartName);
-        if (skinTransform == null)
-        {
-            // Èç¹ûÖ±½Ó²éÕÒÊ§°Ü£¬³¢ÊÔµİ¹é²éÕÒ
-            skinTransform = FindDeepChild(transform, skinPartName);
-        }
-
-        if (skinTransform != null)
-        {
-            skinRenderer = skinTransform.GetComponent<Renderer>();
-        }
-    }
-
-    // µİ¹é²éÕÒ×ÓÎïÌå
     private Transform FindDeepChild(Transform parent, string name)
     {
         foreach (Transform child in parent)
         {
-            if (child.name == name)
-                return child;
-
-            Transform result = FindDeepChild(child, name);
-            if (result != null)
-                return result;
+            if (child.name.Equals(name)) return child;
+            var result = FindDeepChild(child, name);
+            if (result != null) return result;
         }
         return null;
     }
 
-    // ´´½¨±ù¾§²ÄÖÊ
-    private void CreateIceCrystalMaterial()
-    {
-        if (originalSkinMaterial != null)
-        {
-            // ´´½¨²ÄÖÊÊµÀı£¬±ÜÃâĞŞ¸ÄÔ­Ê¼²ÄÖÊ
-            iceCrystalMaterial = new Material(originalSkinMaterial);
-
-            // Ó¦ÓÃ±ù¾§·¨ÏßÌùÍ¼
-            if (iceCrystalNormalMap != null)
-            {
-                iceCrystalMaterial.SetTexture("_BumpMap", iceCrystalNormalMap);
-                // È·±£·¨ÏßÌùÍ¼Ç¿¶ÈÊÊÖĞ
-                iceCrystalMaterial.SetFloat("_BumpScale", 1.0f);
-            }
-        }
-    }
-
-    // ÊÕ¼¯±ù¾§µÄ·½·¨
     public void CollectIceCrystal()
     {
         crystalCount++;
+        if (collectSound != null && audioSource != null) audioSource.PlayOneShot(collectSound);
+        if (iceCrystalParticles != null) iceCrystalParticles.Play();
+        if (playerHealth != null) playerHealth.Heal(healAmount);
 
-        // ²¥·ÅÊÕ¼¯ÒôĞ§
-        if (collectSound != null && audioSource != null)
-            audioSource.PlayOneShot(collectSound);
-
-        // »Ö¸´ÑªÁ¿
-        if (playerHealth != null)
-            playerHealth.Heal(healAmount);
-
-        // ´¥·¢±ù¾§Ğ§¹û
-        StartCoroutine(ActivateIceCrystalEffect());
-
-        // ÏÔÊ¾±ù¾§Á£×ÓĞ§¹û
-        if (iceCrystalParticles != null)
+        if (runtimeMaterial != null)
         {
-            iceCrystalParticles.Play();
+            if (effectCoroutine != null) StopCoroutine(effectCoroutine);
+            effectCoroutine = StartCoroutine(IceEffectRoutine());
         }
     }
 
-    private IEnumerator ActivateIceCrystalEffect()
+    private IEnumerator IceEffectRoutine()
     {
-        if (isEffectActive || skinRenderer == null) yield break;
+        // è®¾ç½®æ³•çº¿
+        if (iceNormalMap != null) runtimeMaterial.SetTexture(nameNormal, iceNormalMap);
 
-        isEffectActive = true;
+        // å°è¯•å¼€å¯è‡ªå‘å…‰ (éƒ¨åˆ†Shaderéœ€è¦)
+        runtimeMaterial.EnableKeyword("_EMISSION");
 
-        // Ó¦ÓÃ±ù¾§²ÄÖÊµ½Æ¤·ô²¿·Ö
-        if (iceCrystalMaterial != null)
+        float timer = 0f;
+        while (timer < 1f)
         {
-            skinRenderer.material = iceCrystalMaterial;
+            timer += Time.deltaTime * transitionSpeed;
+            float t = Mathf.Clamp01(timer);
+
+            // 1. é¢œè‰²å˜åŒ–
+            Color targetColor = originalBaseColor * frostColor;
+            runtimeMaterial.SetColor(nameColor, Color.Lerp(originalBaseColor, targetColor, t));
+
+            // 2. å¹³æ»‘åº¦/ç²—ç³™åº¦å˜åŒ–
+            // å¦‚æœæ˜¯ç²—ç³™åº¦æ¨¡å¼ï¼šç›®æ ‡å€¼ = 1 - å¹³æ»‘åº¦ (å› ä¸º 0 æ˜¯å…‰æ»‘)
+            // å¦‚æœæ˜¯å¹³æ»‘åº¦æ¨¡å¼ï¼šç›®æ ‡å€¼ = å¹³æ»‘åº¦ (å› ä¸º 1 æ˜¯å…‰æ»‘)
+            float targetSmoothVal = isRoughnessMode ? (1 - iceSmoothness) : iceSmoothness;
+            runtimeMaterial.SetFloat(nameSmoothness, Mathf.Lerp(originalVal, targetSmoothVal, t));
+
+            // 3. è‡ªå‘å…‰
+            if (!string.IsNullOrEmpty(nameEmission))
+                runtimeMaterial.SetColor(nameEmission, Color.Lerp(originalEmissionColor, iceEmissionColor, t));
+
+            yield return null;
         }
 
-        // µÈ´ıĞ§¹û³ÖĞøÊ±¼ä
         yield return new WaitForSeconds(effectDuration);
 
-        // »Ö¸´Ô­Ê¼²ÄÖÊ
-        if (originalSkinMaterial != null)
+        // èåŒ–
+        timer = 0f;
+        while (timer < 1f)
         {
-            skinRenderer.material = originalSkinMaterial;
+            timer += Time.deltaTime * transitionSpeed;
+            float t = Mathf.Clamp01(timer);
+
+            Color currentBase = runtimeMaterial.GetColor(nameColor);
+            runtimeMaterial.SetColor(nameColor, Color.Lerp(currentBase, originalBaseColor, t));
+
+            float currentSmooth = runtimeMaterial.GetFloat(nameSmoothness);
+            float targetSmoothVal = isRoughnessMode ? (1 - iceSmoothness) : iceSmoothness;
+            runtimeMaterial.SetFloat(nameSmoothness, Mathf.Lerp(targetSmoothVal, originalVal, t));
+
+            if (!string.IsNullOrEmpty(nameEmission))
+                runtimeMaterial.SetColor(nameEmission, Color.Lerp(iceEmissionColor, originalEmissionColor, t));
+
+            yield return null;
         }
 
-        isEffectActive = false;
+        // è¿˜åŸ
+        if (originalNormalMap != null) runtimeMaterial.SetTexture(nameNormal, originalNormalMap);
+        else runtimeMaterial.SetTexture(nameNormal, null);
     }
 
     public int GetCrystalCount() => crystalCount;
-
-    // ÇåÀí×ÊÔ´
-    void OnDestroy()
-    {
-        if (iceCrystalMaterial != null)
-        {
-            Destroy(iceCrystalMaterial);
-        }
-    }
+    void OnDestroy() { if (runtimeMaterial != null) Destroy(runtimeMaterial); }
 }

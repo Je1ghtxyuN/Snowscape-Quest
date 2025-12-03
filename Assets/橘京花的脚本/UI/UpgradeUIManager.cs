@@ -85,7 +85,6 @@ public class UpgradeUIManager : MonoBehaviour
         if (rightButtonText != null) rightButtonText.text = currentRightUpgrade.displayText;
     }
 
-    // ⭐ 修改：真正实现升级逻辑
     private void ApplyUpgradeEffect(UpgradeOption upgrade)
     {
         Debug.Log($"执行升级: {upgrade.id}");
@@ -105,7 +104,7 @@ public class UpgradeUIManager : MonoBehaviour
                 break;
 
             case "DAMAGE":
-                handler.UpgradeDamage(0.2f); // 增加 20%
+                handler.UpgradeDamage(0.25f); // 增加 25%
                 break;
 
             case "SPEED":

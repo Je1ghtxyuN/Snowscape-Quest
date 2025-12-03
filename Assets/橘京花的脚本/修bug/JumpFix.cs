@@ -1,94 +1,119 @@
-using UnityEngine;
-using UnityEngine.InputSystem; // ÒıÓÃĞÂÊäÈëÏµÍ³
+ï»¿using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.XR.Interaction.Toolkit.Locomotion.Jump;
 
 [RequireComponent(typeof(JumpProvider))]
 public class JumpFix : MonoBehaviour
 {
-    [Header("ÊäÈëÉèÖÃ")]
-    [Tooltip("Çë°ó¶¨ÓÒÊÖµÄ Primary Button (A¼ü)")]
+    [Header("è¾“å…¥è®¾ç½®")]
+    [Tooltip("è¯·åŠ¡å¿…ç»‘å®š RightHand/Optional/PrimaryButton (Aé”®)")]
     public InputActionProperty jumpInputSource;
 
-    [Header("ÌøÔ¾ÏŞÖÆÉèÖÃ")]
-    [Tooltip("ÊÇ·ñÔÊĞí¿ÕÖĞÌøÔ¾£¨¶ş¶ÎÌø£©")]
-    [SerializeField] private bool allowDoubleJump = false;
+    [Header("è·³è·ƒé™åˆ¶")]
+    public float jumpCooldown = 0.5f;
 
-    [Tooltip("ÌøÔ¾ÀäÈ´Ê±¼ä£¨Ãë£©")]
-    [SerializeField] private float jumpCooldown = 0.5f;
+    [Header("è°ƒè¯•ä¿¡æ¯ (è¿è¡Œæ¸¸æˆæ—¶æŸ¥çœ‹)")]
+    [SerializeField] private bool _isPressed;
+    [SerializeField] private bool _isGrounded;
+    [SerializeField] private bool _isCooldownReady;
 
     private JumpProvider m_JumpProvider;
+    private CharacterController m_CharacterController;
     private bool m_LastButtonState;
     private float m_LastJumpTime;
 
     private void Awake()
     {
         m_JumpProvider = GetComponent<JumpProvider>();
+        // å°è¯•è·å– CharacterController ç”¨äºåŒé‡åœ°é¢æ£€æµ‹
+        m_CharacterController = GetComponentInParent<CharacterController>();
     }
 
     private void Start()
     {
-        ConfigureJumpProvider();
-    }
-
-    private void ConfigureJumpProvider()
-    {
-        if (m_JumpProvider == null) return;
-
-        // 1. ½ûÖ¹ JumpProvider ×Ô¼ºµÄÎŞÏŞ¿ÕÌø
-        m_JumpProvider.unlimitedInAirJumps = false;
-
-        // 2. ÉèÖÃ¿ÕÌø´ÎÊı
-        m_JumpProvider.inAirJumpCount = allowDoubleJump ? 1 : 0;
+        if (m_JumpProvider)
+        {
+            // å½»åº•æ¥ç®¡æ§åˆ¶æƒ
+            m_JumpProvider.unlimitedInAirJumps = false;
+            m_JumpProvider.inAirJumpCount = 0; // ç¦æ­¢è‡ªå¸¦çš„ç©ºè·³é€»è¾‘
+        }
     }
 
     private void Update()
     {
-        // »ñÈ¡°´¼ü×´Ì¬ (Ö§³Ö float ÀàĞÍµÄ trigger »ò bool ÀàĞÍµÄ button)
-        bool isPressed = IsJumpInputPressed();
+        // 1. è¯»å–æŒ‰é”®
+        bool currentPress = IsJumpInputPressed();
 
-        // Ö»ÓĞÔÚ°´ÏÂµÄÒ»Ë²¼ä´¥·¢ (Down)
-        if (isPressed && !m_LastButtonState)
+        // 2. æ›´æ–°è°ƒè¯•çŠ¶æ€ (è¯·åœ¨ Inspector è§‚å¯Ÿè¿™ä¸‰ä¸ªå‹¾é€‰æ¡†)
+        _isPressed = currentPress;
+        _isGrounded = CheckIsGrounded();
+        _isCooldownReady = (Time.time - m_LastJumpTime > jumpCooldown);
+
+        // 3. è§¦å‘é€»è¾‘ (æŒ‰ä¸‹ç¬é—´ + å†·å´å¥½ + åœ¨åœ°é¢)
+        if (currentPress && !m_LastButtonState)
         {
-            if (Time.time - m_LastJumpTime > jumpCooldown)
+            if (_isCooldownReady)
             {
-                TryPerformJump();
+                if (_isGrounded)
+                {
+                    PerformForceJump();
+                }
+                else
+                {
+                    Debug.LogWarning("âŒ è·³è·ƒå¤±è´¥ï¼šè§’è‰²æœªç€åœ° (isGrounded = false)");
+                }
+            }
+            else
+            {
+                // Debug.Log("è·³è·ƒå†·å´ä¸­...");
             }
         }
 
-        m_LastButtonState = isPressed;
+        m_LastButtonState = currentPress;
+    }
+
+    // å¼ºåˆ¶è·³è·ƒé€»è¾‘
+    private void PerformForceJump()
+    {
+        if (m_JumpProvider != null)
+        {
+            // ä¸´æ—¶å¼€å¯â€œæ— é™è·³â€æƒé™ï¼Œéª—è¿‡ JumpProvider çš„æ£€æŸ¥
+            // å› ä¸ºæˆ‘ä»¬å·²ç»åœ¨ä¸Šé¢è‡ªå·±æ£€æŸ¥è¿‡ isGrounded äº†ï¼Œè¿™é‡Œä¸ä»…è¦è·³ï¼Œè€Œä¸”å¿…é¡»è·³
+            bool oldState = m_JumpProvider.unlimitedInAirJumps;
+            m_JumpProvider.unlimitedInAirJumps = true;
+
+            m_JumpProvider.Jump();
+
+            // è¿˜åŸçŠ¶æ€
+            m_JumpProvider.unlimitedInAirJumps = oldState;
+
+            m_LastJumpTime = Time.time;
+            Debug.Log("âœ… è·³è·ƒæˆåŠŸï¼");
+        }
     }
 
     private bool IsJumpInputPressed()
     {
         if (jumpInputSource.action == null) return false;
-
-        // ¶ÁÈ¡°´¼üÖµ£¬¼æÈİ Button ºÍ Value ÀàĞÍ
         return jumpInputSource.action.ReadValue<float>() > 0.5f;
     }
 
-    private void TryPerformJump()
+    // åŒé‡åœ°é¢æ£€æµ‹ï¼šä¼˜å…ˆä¿¡ JumpProviderï¼Œä¿¡ä¸è¿‡å°±é—® CharacterController
+    private bool CheckIsGrounded()
     {
-        // ºËĞÄ¼ì²é£ºJumpProvider »á¸ºÔğ¼ì²âÊÇ·ñÔÚµØÃæ (isGrounded)
-        if (m_JumpProvider != null && m_JumpProvider.CanJump())
+        // 1. å°è¯•é€šè¿‡ JumpProvider å†…éƒ¨é€»è¾‘åˆ¤æ–­ (é€šå¸¸ä¾èµ– GravityProvider)
+        // æˆ‘ä»¬åˆ©ç”¨ CanJump çš„éƒ¨åˆ†é€»è¾‘ï¼šå¦‚æœå®ƒå…è®¸è·³ï¼Œè¯´æ˜å®ƒè®¤ä¸ºåœ¨åœ°æ¿ä¸Š
+        // ä½†æˆ‘ä»¬è¦æ’é™¤ unlimit çš„å¹²æ‰°ï¼Œæ‰€ä»¥ä¸èƒ½ç›´æ¥è°ƒ CanJump
+
+        // 2. ç›´æ¥é—® CharacterController (æœ€å‡†)
+        if (m_CharacterController != null)
         {
-            m_JumpProvider.Jump();
-            m_LastJumpTime = Time.time;
-            // Debug.Log("Ö´ĞĞÌøÔ¾");
+            return m_CharacterController.isGrounded;
         }
-        else
-        {
-            // Èç¹ûÕâÀï´òÓ¡ÁË£¬ËµÃ÷°´¼ü¼ì²âµ½ÁË£¬µ«ÊÇÃ»ÔÚµØÃæÉÏ
-            // Debug.LogWarning("ÌøÔ¾Ê§°Ü£º²»ÔÚµØÃæ (Not Grounded) »ò´ÎÊıºÄ¾¡");
-        }
+
+        return false;
     }
 
-    private void OnEnable()
-    {
-        jumpInputSource.action?.Enable();
-    }
-
-    private void OnDisable()
-    {
-        jumpInputSource.action?.Disable();
-    }
+    private void OnEnable() => jumpInputSource.action?.Enable();
+    private void OnDisable() => jumpInputSource.action?.Disable();
 }

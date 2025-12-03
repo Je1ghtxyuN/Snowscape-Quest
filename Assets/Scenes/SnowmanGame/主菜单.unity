@@ -13354,21 +13354,41 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -152.8
       objectReference: {fileID: 0}
+    - target: {fileID: 5135374176465063439, guid: fd607d96d2fc9cd4896fde32175821a0, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.1193
+      objectReference: {fileID: 0}
     - target: {fileID: 5223861755146589371, guid: fd607d96d2fc9cd4896fde32175821a0, type: 3}
       propertyPath: m_text
-      value: "\u96EA\u6751"
+      value: Snowscape Quest
+      objectReference: {fileID: 0}
+    - target: {fileID: 5223861755146589371, guid: fd607d96d2fc9cd4896fde32175821a0, type: 3}
+      propertyPath: m_fontSize
+      value: 48
       objectReference: {fileID: 0}
     - target: {fileID: 5223861755146589371, guid: fd607d96d2fc9cd4896fde32175821a0, type: 3}
       propertyPath: m_fontAsset
       value: 
-      objectReference: {fileID: 11400000, guid: c6b7efe6983bdab46bafa00ce1ccb692, type: 2}
+      objectReference: {fileID: 11400000, guid: fed52aba92ddc6141b32aa33546a00bf, type: 2}
+    - target: {fileID: 5223861755146589371, guid: fd607d96d2fc9cd4896fde32175821a0, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 48
+      objectReference: {fileID: 0}
     - target: {fileID: 5223861755146589371, guid: fd607d96d2fc9cd4896fde32175821a0, type: 3}
       propertyPath: m_sharedMaterial
       value: 
-      objectReference: {fileID: -1292245563074996989, guid: c6b7efe6983bdab46bafa00ce1ccb692, type: 2}
+      objectReference: {fileID: 5436052142645192324, guid: fed52aba92ddc6141b32aa33546a00bf, type: 2}
     - target: {fileID: 5223861755146589371, guid: fd607d96d2fc9cd4896fde32175821a0, type: 3}
       propertyPath: m_hasFontAssetChanged
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5480309247191200934, guid: fd607d96d2fc9cd4896fde32175821a0, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.75242
+      objectReference: {fileID: 0}
+    - target: {fileID: 5480309247191200934, guid: fd607d96d2fc9cd4896fde32175821a0, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -45
       objectReference: {fileID: 0}
     - target: {fileID: 5636638653987966072, guid: fd607d96d2fc9cd4896fde32175821a0, type: 3}
       propertyPath: m_Name
@@ -13417,6 +13437,10 @@ PrefabInstance:
     - target: {fileID: 8819085539059157050, guid: fd607d96d2fc9cd4896fde32175821a0, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9020965166487255066, guid: fd607d96d2fc9cd4896fde32175821a0, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.1344354
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
