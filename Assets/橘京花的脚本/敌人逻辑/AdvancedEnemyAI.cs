@@ -189,6 +189,11 @@ public class AdvancedEnemyAI : MonoBehaviour
         // 打断巡逻协程的等待，防止逻辑冲突
         StopCoroutine("RandomPatrolRoutine");
         StartCoroutine(RandomPatrolRoutine());
+
+        if (PetVoiceSystem.Instance != null)
+        {
+            PetVoiceSystem.Instance.TryPlayEnemySpottedVoice();
+        }
     }
 
     void StopChasing()

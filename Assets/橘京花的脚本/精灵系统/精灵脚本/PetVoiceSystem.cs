@@ -21,6 +21,10 @@ public class PetVoiceSystem : MonoBehaviour
     private AudioSource audioSource;
     private bool isSpeaking = false;
 
+    private float lastEnemySpottedTime = -999f;
+
+    private bool hasPlayedFirstDrop = false;
+
     void Awake()
     {
         Instance = this;
@@ -33,6 +37,26 @@ public class PetVoiceSystem : MonoBehaviour
     {
         StartCoroutine(PlayVoiceRoutine(id, delay));
     }
+
+    public void TryPlayEnemySpottedVoice()
+    {
+        if (Time.time - lastEnemySpottedTime > 15f)
+        {
+            PlayVoice("FindEnemy");
+            lastEnemySpottedTime = Time.time;
+        }
+    }
+
+    public void TryPlayFirstDropVoice()
+    {
+        // 只有当标志位为 false (没播过) 时才播放
+        if (!hasPlayedFirstDrop)
+        {
+            PlayVoice("Tutorial6");
+            hasPlayedFirstDrop = true; // 锁死，下次不再播
+        }
+    }
+
 
     private IEnumerator PlayVoiceRoutine(string id, float delay)
     {

@@ -94,6 +94,11 @@ public class EnemyBaofeng : MonoBehaviour
             // 精英怪可能比较高大，生成位置再高一点，防止卡在身体里
             Vector3 spawnPos = transform.position + Vector3.up * 0.8f;
             Instantiate(iceCrystalPrefab, spawnPos, Quaternion.identity);
+
+            if (PetVoiceSystem.Instance != null)
+            {
+                PetVoiceSystem.Instance.TryPlayFirstDropVoice();
+            }
         }
 
         healthSystem.OnDeath -= Die;

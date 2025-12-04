@@ -42,6 +42,18 @@ public class GameRoundManager : MonoBehaviour
     {
         if (spawner == null) spawner = FindObjectOfType<AdvancedSnowmanManager>();
 
+        if (PetVoiceSystem.Instance != null)
+        {
+            // 1. 播放第一句 (例如：延迟 1秒 后开始，给玩家一点反应时间)
+            // 语音ID: "Intro_1" (请确保你在Inspector里填了这个ID)
+            PetVoiceSystem.Instance.PlayVoice("Start", 1.0f);
+
+            // 2. 播放第二句 (例如：延迟 5秒 后开始)
+            // ⚠️ 关键点：这个时间 = 第一句的开始时间(1s) + 第一句音频的时长(假设4s)
+            // 如果你设置的时间太短，导致第一句还没说完，PetVoiceSystem 会因为防打断逻辑跳过第二句！
+            PetVoiceSystem.Instance.PlayVoice("Tutorial1", 8.5f);
+        }
+
         // 游戏开始，进入第一回合
         StartCoroutine(StartNextRoundRoutine());
     }
@@ -136,6 +148,11 @@ public class GameRoundManager : MonoBehaviour
         currentState = GameState.Victory;
         isGameComplete = true;
         UpdateUI();
+
+        if (PetVoiceSystem.Instance != null)
+        {
+            PetVoiceSystem.Instance.PlayVoice("Success", 1.0f); // 延迟1秒更有感觉
+        }
     }
 
     private void UpdateUI()

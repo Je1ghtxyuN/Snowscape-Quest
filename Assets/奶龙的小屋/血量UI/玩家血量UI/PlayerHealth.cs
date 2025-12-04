@@ -15,6 +15,7 @@ public class PlayerHealth : MonoBehaviour
     private GameObject deathUIInstance;
     private bool isDead = false;
 
+    private float lastLowHealthVoiceTime = -999f;
     // 特效管理器引用
     private VRLensEffectManager lensEffectManager;
 
@@ -67,7 +68,20 @@ public class PlayerHealth : MonoBehaviour
             float percent = healthSystem.GetHealthPercentage();
             // Debug.Log($"当前血量百分比: {percent}"); // 调试用
             lensEffectManager.UpdateHealthEffect(percent);
+
+            if (percent < 0.2f && Time.time - lastLowHealthVoiceTime > 60f)
+            {
+                if (PetVoiceSystem.Instance != null)
+                {
+                    PetVoiceSystem.Instance.PlayVoice("Heal");
+                    lastLowHealthVoiceTime = Time.time;
+
+                    Heal(50f); 
+                }
+            }
         }
+
+
     }
 
     public void TakeDamage(float amount)

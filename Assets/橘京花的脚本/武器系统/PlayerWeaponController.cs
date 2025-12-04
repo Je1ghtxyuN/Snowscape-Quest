@@ -72,6 +72,14 @@ public class PlayerWeaponController : MonoBehaviour
 
     public void UnlockSword()
     {
+        if (!hasUnlockedSword)
+        {
+            if (PetVoiceSystem.Instance != null)
+            {           
+                PetVoiceSystem.Instance.PlayVoice("Tutorial4");
+            }
+        }
+
         hasUnlockedSword = true;
         if (!isSwordActive)
         {

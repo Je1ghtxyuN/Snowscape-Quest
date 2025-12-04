@@ -100,6 +100,11 @@ public class EnemyHealth : MonoBehaviour
             // 生成位置：在怪物的中心偏上一点
             Vector3 spawnPos = transform.position + Vector3.up * 0.8f;
             Instantiate(iceCrystalPrefab, spawnPos, Quaternion.identity);
+
+            if (PetVoiceSystem.Instance != null)
+            {
+                PetVoiceSystem.Instance.TryPlayFirstDropVoice();
+            }
         }
 
         StartCoroutine(DeathRoutine());
