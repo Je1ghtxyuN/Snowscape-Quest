@@ -41,6 +41,10 @@ public class UpgradeUIManager : MonoBehaviour
             upgradePool.Add(new UpgradeOption { id = "SPEED", displayText = "迅捷步伐\n<size=60%>提升 20% 移速</size>" });
             // 只有当玩家还没解锁剑的时候，才应该放入池子，这里简化处理，逻辑里判断
             upgradePool.Add(new UpgradeOption { id = "SWORD", displayText = "寒冰之剑\n<size=60%>解锁近战武器 (按B切换)</size>" });
+
+            upgradePool.Add(new UpgradeOption { id = "PET_MULTI", displayText = "精灵散射\n<size=60%>精灵子弹数量 +1</size>" });
+            upgradePool.Add(new UpgradeOption { id = "PET_RATE", displayText = "精灵急速\n<size=60%>精灵射速提升 25%</size>" });
+            upgradePool.Add(new UpgradeOption { id = "PET_DMG", displayText = "精灵强化\n<size=60%>精灵伤害提升 30%</size>" });
         }
     }
 
@@ -69,17 +73,41 @@ public class UpgradeUIManager : MonoBehaviour
 
     private void RandomizeUpgrades()
     {
-        if (upgradePool.Count < 2) return;
+        // 1. 创建一个临时列表，用于筛选有效的升级
+        List<UpgradeOption> validPool = new List<UpgradeOption>();
 
-        int index1 = Random.Range(0, upgradePool.Count);
+        foreach (var option in upgradePool)
+        {
+            // ⭐ 核心逻辑：如果是寒冰剑，且已经解锁了，就不加进池子
+            if (option.id == "SWORD")
+            {
+                if (PlayerUpgradeHandler.Instance != null && !PlayerUpgradeHandler.Instance.IsSwordUnlocked())
+                {
+                    validPool.Add(option); // 还没解锁，可以加
+                }
+            }
+            else
+            {
+                validPool.Add(option); // 其他升级都可以无限加
+            }
+        }
+
+        if (validPool.Count < 2)
+        {
+            Debug.LogWarning("有效升级选项不足2个！");
+            return;
+        }
+
+        // 2. 从有效池中随机
+        int index1 = Random.Range(0, validPool.Count);
         int index2 = index1;
         while (index2 == index1)
         {
-            index2 = Random.Range(0, upgradePool.Count);
+            index2 = Random.Range(0, validPool.Count);
         }
 
-        currentLeftUpgrade = upgradePool[index1];
-        currentRightUpgrade = upgradePool[index2];
+        currentLeftUpgrade = validPool[index1];
+        currentRightUpgrade = validPool[index2];
 
         if (leftButtonText != null) leftButtonText.text = currentLeftUpgrade.displayText;
         if (rightButtonText != null) rightButtonText.text = currentRightUpgrade.displayText;
@@ -118,6 +146,15 @@ public class UpgradeUIManager : MonoBehaviour
             //case "AMMO":
             //    Debug.Log("弹药升级暂未实现");
             //    break;
+            case "PET_MULTI":
+                handler.UpgradePetMultishot();
+                break;
+            case "PET_RATE":
+                handler.UpgradePetFireRate(0.25f);
+                break;
+            case "PET_DMG":
+                handler.UpgradePetDamage(0.3f);
+                break;
 
             default:
                 Debug.LogWarning("未知的升级ID");

@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -10,30 +9,29 @@ public class GameRoundManager : MonoBehaviour
     [System.Serializable]
     public struct RoundData
     {
-        public string roundName; // 回合名称，如 "第1波"
-        public int enemyCount;   // 这一波生成的敌人数量
+        public string roundName;
+        public int enemyCount;
     }
-
-    [Header("回合配置")]
-    public List<RoundData> rounds = new List<RoundData>();
 
     [Header("引用设置")]
     public AdvancedSnowmanManager spawner;
-    public UpgradeUIManager upgradeUI; // 下面会提供这个脚本
-    public GameInfoUI gameInfoUI;      // 替代原来的 ScoreDisplayUI
+    public UpgradeUIManager upgradeUI;
+    public GameInfoUI gameInfoUI;
+
+    // 运行时数据
+    private List<RoundData> currentRoundsConfig;
+    private bool isEndlessMode = false;
 
     [Header("状态监控 (只读)")]
     public int currentRoundIndex = -1;
     public int enemiesAlive = 0;
     public bool isGameComplete = false;
 
-    // 游戏状态
     private enum GameState { Waiting, Spawning, Fighting, UpgradePhase, Victory }
     private GameState currentState = GameState.Waiting;
 
     void Awake()
     {
-        // 单例模式
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
     }
@@ -42,53 +40,93 @@ public class GameRoundManager : MonoBehaviour
     {
         if (spawner == null) spawner = FindObjectOfType<AdvancedSnowmanManager>();
 
+        // --- ⭐ 核心修改：从 GameSettings 读取配置 ---
+        if (GameSettings.Instance != null)
+        {
+            isEndlessMode = (GameSettings.Instance.currentDifficulty == DifficultyLevel.Endless);
+
+            if (!isEndlessMode)
+            {
+                // 普通模式：读取预设列表
+                currentRoundsConfig = GameSettings.Instance.GetRoundsForCurrentDifficulty();
+                Debug.Log($"🔵 已加载难度: {GameSettings.Instance.currentDifficulty}, 总回合数: {currentRoundsConfig.Count}");
+            }
+            else
+            {
+                Debug.Log("🟣 已启动无尽模式");
+            }
+        }
+        else
+        {
+            // 保底：如果直接运行场景没有 GameSettings，就用无尽模式或默认数据
+            Debug.LogWarning("⚠️ 未找到 GameSettings，启用默认无尽模式测试");
+            isEndlessMode = true;
+        }
+        // -------------------------------------------
+
+        // 播放开场语音
         if (PetVoiceSystem.Instance != null)
         {
-            // 1. 播放第一句 (例如：延迟 1秒 后开始，给玩家一点反应时间)
-            // 语音ID: "Intro_1" (请确保你在Inspector里填了这个ID)
             PetVoiceSystem.Instance.PlayVoice("Start", 1.0f);
-
-            // 2. 播放第二句 (例如：延迟 5秒 后开始)
-            // ⚠️ 关键点：这个时间 = 第一句的开始时间(1s) + 第一句音频的时长(假设4s)
-            // 如果你设置的时间太短，导致第一句还没说完，PetVoiceSystem 会因为防打断逻辑跳过第二句！
             PetVoiceSystem.Instance.PlayVoice("Tutorial1", 8.5f);
         }
 
-        // 游戏开始，进入第一回合
         StartCoroutine(StartNextRoundRoutine());
     }
 
-    // 开启下一回合的协程
     private IEnumerator StartNextRoundRoutine()
     {
         currentRoundIndex++;
 
-        // 检查是否所有回合都结束了
-        if (currentRoundIndex >= rounds.Count)
+        // --- ⭐ 修改：判断游戏是否结束 ---
+        if (!isEndlessMode)
         {
-            HandleVictory();
-            yield break;
+            // 普通模式：如果索引超过配置数量，游戏胜利
+            if (currentRoundIndex >= currentRoundsConfig.Count)
+            {
+                HandleVictory();
+                yield break;
+            }
         }
 
         currentState = GameState.Spawning;
-        UpdateUI();
 
-        // 获取当前回合配置
-        RoundData currentRound = rounds[currentRoundIndex];
-        Debug.Log($"🔵 开始回合: {currentRound.roundName}, 敌人数量: {currentRound.enemyCount}");
+        // --- ⭐ 修改：计算当前回合数据 ---
+        RoundData currentRoundData;
 
-        // 通知生成器干活
+        if (isEndlessMode)
+        {
+            // 无尽模式：程序化生成数据
+            currentRoundData = new RoundData();
+            currentRoundData.roundName = $"Wave {currentRoundIndex + 1} (Endless)";
+
+            // 算法：基础数量 + (回合数 * 系数)
+            // 例如：5 + (0 * 2) = 5
+            // 例如：5 + (5 * 2) = 15
+            int baseCount = GameSettings.Instance ? GameSettings.Instance.endlessBaseEnemyCount : 5;
+            float factor = GameSettings.Instance ? GameSettings.Instance.endlessGrowthFactor : 1.5f;
+
+            currentRoundData.enemyCount = Mathf.FloorToInt(baseCount + (currentRoundIndex * factor));
+        }
+        else
+        {
+            // 普通模式：直接读取
+            currentRoundData = currentRoundsConfig[currentRoundIndex];
+        }
+
+        UpdateUI(currentRoundData.roundName);
+        Debug.Log($"⚔️ 开始回合: {currentRoundData.roundName}, 敌人: {currentRoundData.enemyCount}");
+
         if (spawner != null)
         {
-            enemiesAlive = currentRound.enemyCount;
-            spawner.SpawnEnemies(currentRound.enemyCount);
+            enemiesAlive = currentRoundData.enemyCount;
+            spawner.SpawnEnemies(currentRoundData.enemyCount);
         }
 
         currentState = GameState.Fighting;
-        UpdateUI();
+        UpdateUI(currentRoundData.roundName);
     }
 
-    // 当敌人死亡时被调用 (由 EnemyBaofeng/EnemyHealth 调用)
     public void OnEnemyKilled()
     {
         if (currentState != GameState.Fighting) return;
@@ -96,9 +134,10 @@ public class GameRoundManager : MonoBehaviour
         enemiesAlive--;
         if (enemiesAlive < 0) enemiesAlive = 0;
 
-        UpdateUI();
+        // 刷新UI显示
+        string roundName = isEndlessMode ? $"第 {currentRoundIndex + 1} 波" : currentRoundsConfig[currentRoundIndex].roundName;
+        if (gameInfoUI != null) gameInfoUI.UpdateInfo(roundName, enemiesAlive);
 
-        // 检查当前回合是否清空
         if (enemiesAlive == 0)
         {
             EndRound();
@@ -107,35 +146,25 @@ public class GameRoundManager : MonoBehaviour
 
     private void EndRound()
     {
-        Debug.Log("🟢 回合结束，进入休息/升级阶段");
+        Debug.Log("🟢 回合结束");
         currentState = GameState.UpgradePhase;
 
-        if (spawner != null)
-        {
-            spawner.ClearAllSnowmen();
-        }
+        if (spawner != null) spawner.ClearAllSnowmen();
 
-        // 如果还有下一回合，显示升级UI
-        if (currentRoundIndex < rounds.Count - 1)
+        // 检查是否还有下一回合（无尽模式永远有，普通模式看列表）
+        bool hasNextRound = isEndlessMode || (currentRoundIndex < currentRoundsConfig.Count - 1);
+
+        if (hasNextRound)
         {
-            if (upgradeUI != null)
-            {
-                upgradeUI.ShowUpgradePanel();
-            }
-            else
-            {
-                // 如果没有设置UI，直接下一回合
-                FinishUpgrade();
-            }
+            if (upgradeUI != null) upgradeUI.ShowUpgradePanel();
+            else FinishUpgrade();
         }
         else
         {
-            // 如果是最后一回合打完，直接胜利
             HandleVictory();
         }
     }
 
-    // 升级选择完毕，由 UI 按钮调用此方法
     public void FinishUpgrade()
     {
         if (upgradeUI != null) upgradeUI.HideUpgradePanel();
@@ -144,23 +173,28 @@ public class GameRoundManager : MonoBehaviour
 
     private void HandleVictory()
     {
-        Debug.Log("🏆 游戏通关！请前往大门。");
+        Debug.Log("🏆 游戏通关！");
         currentState = GameState.Victory;
         isGameComplete = true;
-        UpdateUI();
+
+        if (gameInfoUI != null) gameInfoUI.UpdateInfo("任务完成", 0);
 
         if (PetVoiceSystem.Instance != null)
         {
-            PetVoiceSystem.Instance.PlayVoice("Success", 1.0f); // 延迟1秒更有感觉
+            PetVoiceSystem.Instance.PlayVoice("Success", 1.0f);
         }
     }
 
-    private void UpdateUI()
+    private void UpdateUI(string roundName)
     {
         if (gameInfoUI != null)
         {
-            string roundText = (currentRoundIndex + 1) > rounds.Count ? "通关" : $"{currentRoundIndex + 1} / {rounds.Count}";
-            gameInfoUI.UpdateInfo(roundText, enemiesAlive);
+            gameInfoUI.UpdateInfo(roundName, enemiesAlive);
         }
+    }
+
+    void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
     }
 }

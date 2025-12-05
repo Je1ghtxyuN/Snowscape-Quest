@@ -17,6 +17,11 @@ public class PlayerUpgradeHandler : MonoBehaviour
     public float speedMultiplier = 1.0f;
     public int maxAmmoLevel = 0; // 弹药逻辑暂时预留
 
+    [Header("精灵升级属性")]
+    public int petProjectileCount = 1;      // 子弹数量
+    public float petFireRateMultiplier = 1.0f; // 射速倍率 
+    public float petDamageMultiplier = 1.0f;   // 伤害倍率
+
     private float initialMoveSpeed = 0f;
 
     void Awake()
@@ -80,5 +85,30 @@ public class PlayerUpgradeHandler : MonoBehaviour
         {
             weaponController.UnlockSword();
         }
+    }
+
+    public bool IsSwordUnlocked()
+    {
+        if (weaponController != null) return weaponController.hasUnlockedSword;
+        return false;
+    }
+
+    // --- 精灵升级方法 ---
+    public void UpgradePetMultishot()
+    {
+        petProjectileCount++;
+        Debug.Log($"精灵升级：多重射击！当前数量: {petProjectileCount}");
+    }
+
+    public void UpgradePetFireRate(float amount) // amount 比如 0.2 表示快20%
+    {
+        petFireRateMultiplier += amount;
+        Debug.Log($"精灵升级：射速提升！当前倍率: {petFireRateMultiplier}");
+    }
+
+    public void UpgradePetDamage(float amount)
+    {
+        petDamageMultiplier += amount;
+        Debug.Log($"精灵升级：伤害提升！当前倍率: {petDamageMultiplier}");
     }
 }

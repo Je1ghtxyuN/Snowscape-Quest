@@ -19,6 +19,10 @@ public class AdvancedEnemyAI : MonoBehaviour
     public float minMoveDistance = 0.1f;
     public float changeDirectionCooldown = 1.0f;
 
+    [Header("防穿模保护")]
+    [Tooltip("如果Y轴低于这个值，视为掉出地图，将强制重置位置")]
+    public float minimumY = -10f;
+
     [Header("玩家检测")]
     public float detectionRange = 10f;
     public float attackRange = 7f;
@@ -91,6 +95,8 @@ public class AdvancedEnemyAI : MonoBehaviour
         // 1. 核心检测逻辑
         DetectPlayerLogic();
 
+        CheckFallOutOfBounds();
+
         // 2. 攻击时停止物理移动
         if (isAttacking)
         {
@@ -134,6 +140,39 @@ public class AdvancedEnemyAI : MonoBehaviour
         }
 
         // 3. 巡逻状态完全由协程控制
+    }
+
+    void CheckFallOutOfBounds()
+    {
+        if (transform.position.y < minimumY)
+        {
+            Debug.LogWarning($"雪人 {gameObject.name} 掉出地图 (Y={transform.position.y})，正在原地重置高度...");
+
+            // 1. 获取当前坐标
+            Vector3 resetPos = transform.position;
+
+            // 2. 只修改 Y 轴 (高度)
+            // 建议参考玩家的高度 + 10米，这样能保证肯定在地面上方
+            if (player != null)
+            {
+                resetPos.y = player.position.y + 10f;
+            }
+            else
+            {
+                // 找不到玩家时的保底高度 (假设地面是0)
+                resetPos.y = 10f;
+            }
+
+            // 3. 重置物理速度 (非常重要！否则它带着下坠速度重置，会瞬间再次穿模)
+            if (rb != null)
+            {
+                rb.velocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+            }
+
+            // 4. 应用位置
+            transform.position = resetPos;
+        }
     }
 
     // --------------------------------------------------------------------------------

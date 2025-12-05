@@ -11,6 +11,7 @@ TagManager:
   - Snowball
   - rock
   - wood
+  - Bullet
   layers:
   - Default
   - TransparentFX
