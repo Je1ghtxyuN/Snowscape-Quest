@@ -68,7 +68,8 @@ public class GameRoundManager : MonoBehaviour
         if (PetVoiceSystem.Instance != null)
         {
             PetVoiceSystem.Instance.PlayVoice("Start", 1.0f);
-            PetVoiceSystem.Instance.PlayVoice("Tutorial1", 8.5f);
+            PetVoiceSystem.Instance.PlayVoice("Tutorial_Move", 24.5f);
+            PetVoiceSystem.Instance.PlayVoice("Tutorial_Look", 44.5f);
         }
 
         StartCoroutine(StartNextRoundRoutine());
@@ -181,7 +182,7 @@ public class GameRoundManager : MonoBehaviour
 
         if (PetVoiceSystem.Instance != null)
         {
-            PetVoiceSystem.Instance.PlayVoice("Success", 1.0f);
+            PetVoiceSystem.Instance.PlayVoice("Level_Complete", 1.0f);
         }
     }
 

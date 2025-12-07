@@ -46,6 +46,8 @@ public class IceCrystalEffectSystem : MonoBehaviour
     private string nameEmission;
     private bool isRoughnessMode = false; // 标记是否为粗糙度模式 (glTF)
 
+    private bool hasPlayedFirstAbsorb = false;
+
     void Start()
     {
         if (playerHealth == null) playerHealth = GetComponent<PlayerHealth>();
@@ -138,6 +140,12 @@ public class IceCrystalEffectSystem : MonoBehaviour
         {
             if (effectCoroutine != null) StopCoroutine(effectCoroutine);
             effectCoroutine = StartCoroutine(IceEffectRoutine());
+        }
+
+        if (!hasPlayedFirstAbsorb && PetVoiceSystem.Instance != null)
+        {
+            PetVoiceSystem.Instance.PlayVoice("Tutorial_Absorb", 1.0f);
+            hasPlayedFirstAbsorb = true; // 锁死，不再播
         }
     }
 

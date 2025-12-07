@@ -76,7 +76,7 @@ public class PlayerWeaponController : MonoBehaviour
         {
             if (PetVoiceSystem.Instance != null)
             {           
-                PetVoiceSystem.Instance.PlayVoice("Tutorial4");
+                PetVoiceSystem.Instance.PlayVoice("Weapon_Sword");
             }
         }
 

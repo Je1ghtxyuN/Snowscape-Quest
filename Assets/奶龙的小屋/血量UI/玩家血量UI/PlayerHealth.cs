@@ -73,7 +73,7 @@ public class PlayerHealth : MonoBehaviour
             {
                 if (PetVoiceSystem.Instance != null)
                 {
-                    PetVoiceSystem.Instance.PlayVoice("Heal");
+                    PetVoiceSystem.Instance.PlayVoice("Player_LowHealth");
                     lastLowHealthVoiceTime = Time.time;
 
                     Heal(50f); 
@@ -106,6 +106,12 @@ public class PlayerHealth : MonoBehaviour
         if (snowmanManager != null)
         {
             snowmanManager.ClearAllSnowmen();
+        }
+
+        if (PetVoiceSystem.Instance != null)
+        {
+            // 语音ID: "Game_Over"
+            PetVoiceSystem.Instance.PlayVoice("Game_Over");
         }
 
         ShowDeathUI();

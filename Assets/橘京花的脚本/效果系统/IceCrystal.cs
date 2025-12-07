@@ -19,6 +19,7 @@ public class IceCrystal : MonoBehaviour
     private bool canBeCollected = false;
     private bool isAttracting = false;
 
+
     void Start()
     {
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");

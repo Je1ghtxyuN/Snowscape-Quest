@@ -42,7 +42,7 @@ public class PetVoiceSystem : MonoBehaviour
     {
         if (Time.time - lastEnemySpottedTime > 15f)
         {
-            PlayVoice("FindEnemy");
+            PlayVoice("Enemy_Spotted");
             lastEnemySpottedTime = Time.time;
         }
     }
@@ -52,7 +52,7 @@ public class PetVoiceSystem : MonoBehaviour
         // 只有当标志位为 false (没播过) 时才播放
         if (!hasPlayedFirstDrop)
         {
-            PlayVoice("Tutorial6");
+            PlayVoice("First_Drop");
             hasPlayedFirstDrop = true; // 锁死，下次不再播
         }
     }
