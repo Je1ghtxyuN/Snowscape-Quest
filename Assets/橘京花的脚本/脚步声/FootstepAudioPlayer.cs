@@ -72,14 +72,28 @@ public class FootstepAudioPlayer : MonoBehaviour
 
         if (lastFootstepTime >= 0 && Time.time - lastFootstepTime < footstepAudio.Delay)
         {
-            Debug.Log($"脚步声延迟中，还需等待 {footstepAudio.Delay - (Time.time - lastFootstepTime):F2}秒");
+            // Debug.Log($"脚步声延迟中..."); // 注释掉避免刷屏
             return;
         }
 
         AudioClip clip = footstepAudio.AudioClips[Random.Range(0, footstepAudio.AudioClips.Count)];
-        audioSource.PlayOneShot(clip);
+
+        // --- 修改开始：检测标签并调整音量 ---
+        float volumeScale = 1.0f; // 默认音量为 1.0 (100%)
+
+        // 使用 OrdinalIgnoreCase 忽略大小写，这样 "snow", "Snow", "SNOW" 都可以识别
+        if (currentSurfaceTag.Equals("Snow", System.StringComparison.OrdinalIgnoreCase))
+        {
+            volumeScale = 0.6f; // 如果是雪地，音量设为 0.6
+        }
+        // 你可以在这里继续添加其他 else if ...
+
+        // PlayOneShot 的第二个参数控制音量 (0.0 - 1.0)
+        audioSource.PlayOneShot(clip, volumeScale);
+        // --- 修改结束 ---
+
         lastFootstepTime = Time.time;
-        Debug.Log($"成功播放脚步声: {clip.name} (标签: {currentSurfaceTag})");
+        Debug.Log($"成功播放脚步声: {clip.name} (标签: {currentSurfaceTag}, 音量: {volumeScale})");
     }
 
     private FootstepAudio FindFootstepAudio(string tag)

@@ -147,6 +147,11 @@ public class IceCrystalEffectSystem : MonoBehaviour
             PetVoiceSystem.Instance.PlayVoice("Tutorial_Absorb", 1.0f);
             hasPlayedFirstAbsorb = true; // 锁死，不再播
         }
+
+        if (BurnRecoverySystem.Instance != null)
+        {
+            BurnRecoverySystem.Instance.AddRecoveryProgress();
+        }
     }
 
     private IEnumerator IceEffectRoutine()

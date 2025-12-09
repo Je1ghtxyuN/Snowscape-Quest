@@ -17,6 +17,7 @@ public class GameRoundManager : MonoBehaviour
     public AdvancedSnowmanManager spawner;
     public UpgradeUIManager upgradeUI;
     public GameInfoUI gameInfoUI;
+    public GameObject startWall;
 
     // 运行时数据
     private List<RoundData> currentRoundsConfig;
@@ -69,9 +70,31 @@ public class GameRoundManager : MonoBehaviour
         {
             PetVoiceSystem.Instance.PlayVoice("Start", 1.0f);
             PetVoiceSystem.Instance.PlayVoice("Tutorial_Move", 24.5f);
-            PetVoiceSystem.Instance.PlayVoice("Tutorial_Look", 44.5f);
+            PetVoiceSystem.Instance.PlayVoice("Tutorial_Look", 34.5f);
         }
 
+        //StartCoroutine(StartNextRoundRoutine());
+        StartCoroutine(WaitAndStartGameRoutine());
+    }
+
+    private IEnumerator WaitAndStartGameRoutine()
+    {
+        // 确保空气墙一开始是存在的
+        if (startWall != null) startWall.SetActive(true);
+
+        Debug.Log("⏳ 游戏流程：等待新手语音播放 (43秒)...");
+
+        // 等待 43 秒
+        yield return new WaitForSeconds(43.0f);
+
+        // 移除空气墙
+        if (startWall != null)
+        {
+            startWall.SetActive(false);
+            Debug.Log("🔓 语音结束，空气墙已移除，玩家可自由移动。");
+        }
+
+        // 正式开始第一波刷怪
         StartCoroutine(StartNextRoundRoutine());
     }
 
@@ -136,7 +159,7 @@ public class GameRoundManager : MonoBehaviour
         if (enemiesAlive < 0) enemiesAlive = 0;
 
         // 刷新UI显示
-        string roundName = isEndlessMode ? $"第 {currentRoundIndex + 1} 波" : currentRoundsConfig[currentRoundIndex].roundName;
+        string roundName = isEndlessMode ? $" {currentRoundIndex + 1} " : currentRoundsConfig[currentRoundIndex].roundName;
         if (gameInfoUI != null) gameInfoUI.UpdateInfo(roundName, enemiesAlive);
 
         if (enemiesAlive == 0)
