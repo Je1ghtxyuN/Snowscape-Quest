@@ -47,7 +47,7 @@ public class GameInfoUI : MonoBehaviour
             }
             else
             {
-                infoText.text = $"Round: {roundStr}\nenemiesLeft: {enemiesLeft}";
+                infoText.text = $"round: {roundStr}\nenemiesLeft: {enemiesLeft}";
             }
         }
     }

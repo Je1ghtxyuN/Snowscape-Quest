@@ -43,7 +43,7 @@ Shader "Custom/WaterFall"
 		
 
 		Tags { "RenderPipeline"="UniversalPipeline" "RenderType"="Opaque" "Queue"="Geometry" }
-		Cull Back
+		Cull Off
 		AlphaToMask Off
 		HLSLINCLUDE
 		#pragma target 2.0

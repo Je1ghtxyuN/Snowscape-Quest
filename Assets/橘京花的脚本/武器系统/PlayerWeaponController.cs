@@ -12,9 +12,15 @@ public class PlayerWeaponController : MonoBehaviour
     [Tooltip("寒冰剑的游戏物体")]
     public GameObject iceSwordObject;
 
+    [Header("动画控制")]
+    [Tooltip("请把玩家模型身上的 Animator 组件拖进来")]
+    public Animator handAnimator;
+
     [Header("状态")]
     public bool hasUnlockedSword = false;
     private bool isSwordActive = false;
+
+    private string gripBoolName = "IsHoldingSword";
 
     void Start()
     {
@@ -92,6 +98,10 @@ public class PlayerWeaponController : MonoBehaviour
     {
         isSwordActive = !isSwordActive;
         // 具体的 SetActive/Enabled 逻辑已移交 Update 处理
+        if (handAnimator != null)
+        {
+            handAnimator.SetBool(gripBoolName, isSwordActive);
+        }
     }
 
     void OnDestroy()

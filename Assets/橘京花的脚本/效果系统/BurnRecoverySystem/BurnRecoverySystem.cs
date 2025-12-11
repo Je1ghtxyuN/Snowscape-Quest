@@ -73,6 +73,12 @@ public class BurnRecoverySystem : MonoBehaviour
         UpdateVisuals(progress);
     }
 
+    public float GetRecoveryProgress()
+    {
+        if (targetCrystalCount == 0) return 0f;
+        return Mathf.Clamp01((float)currentCrystals / targetCrystalCount);
+    }
+
     private void UpdateVisuals(float progress)
     {
         // UI 更新

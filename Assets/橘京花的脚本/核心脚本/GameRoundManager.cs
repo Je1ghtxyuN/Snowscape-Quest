@@ -19,17 +19,25 @@ public class GameRoundManager : MonoBehaviour
     public GameInfoUI gameInfoUI;
     public GameObject startWall;
 
+    [Header("难度优化")]
+    [Tooltip("每回合额外生成的雪人数量，让玩家更容易凑齐击杀数，不用找最后一只。")]
+    public int extraSpawnCount = 2;
+
     // 运行时数据
     private List<RoundData> currentRoundsConfig;
     private bool isEndlessMode = false;
 
     [Header("状态监控 (只读)")]
     public int currentRoundIndex = -1;
+    [Tooltip("这里显示的是【剩余需要击杀】的数量，而不是场上存活的数量")]
     public int enemiesAlive = 0;
     public bool isGameComplete = false;
 
     private enum GameState { Waiting, Spawning, Fighting, UpgradePhase, Victory }
     private GameState currentState = GameState.Waiting;
+
+    // 缓存当前回合的名称，用于UI刷新
+    private string currentRoundNameDisplay;
 
     void Awake()
     {
@@ -41,14 +49,13 @@ public class GameRoundManager : MonoBehaviour
     {
         if (spawner == null) spawner = FindObjectOfType<AdvancedSnowmanManager>();
 
-        // --- ⭐ 核心修改：从 GameSettings 读取配置 ---
+        // --- 从 GameSettings 读取配置 ---
         if (GameSettings.Instance != null)
         {
             isEndlessMode = (GameSettings.Instance.currentDifficulty == DifficultyLevel.Endless);
 
             if (!isEndlessMode)
             {
-                // 普通模式：读取预设列表
                 currentRoundsConfig = GameSettings.Instance.GetRoundsForCurrentDifficulty();
                 Debug.Log($"🔵 已加载难度: {GameSettings.Instance.currentDifficulty}, 总回合数: {currentRoundsConfig.Count}");
             }
@@ -59,11 +66,9 @@ public class GameRoundManager : MonoBehaviour
         }
         else
         {
-            // 保底：如果直接运行场景没有 GameSettings，就用无尽模式或默认数据
             Debug.LogWarning("⚠️ 未找到 GameSettings，启用默认无尽模式测试");
             isEndlessMode = true;
         }
-        // -------------------------------------------
 
         // 播放开场语音
         if (PetVoiceSystem.Instance != null)
@@ -73,28 +78,22 @@ public class GameRoundManager : MonoBehaviour
             PetVoiceSystem.Instance.PlayVoice("Tutorial_Look", 34.5f);
         }
 
-        //StartCoroutine(StartNextRoundRoutine());
         StartCoroutine(WaitAndStartGameRoutine());
     }
 
     private IEnumerator WaitAndStartGameRoutine()
     {
-        // 确保空气墙一开始是存在的
         if (startWall != null) startWall.SetActive(true);
 
         Debug.Log("⏳ 游戏流程：等待新手语音播放 (43秒)...");
-
-        // 等待 43 秒
         yield return new WaitForSeconds(43.0f);
 
-        // 移除空气墙
         if (startWall != null)
         {
             startWall.SetActive(false);
             Debug.Log("🔓 语音结束，空气墙已移除，玩家可自由移动。");
         }
 
-        // 正式开始第一波刷怪
         StartCoroutine(StartNextRoundRoutine());
     }
 
@@ -102,10 +101,9 @@ public class GameRoundManager : MonoBehaviour
     {
         currentRoundIndex++;
 
-        // --- ⭐ 修改：判断游戏是否结束 ---
+        // 检查是否通关 (普通模式)
         if (!isEndlessMode)
         {
-            // 普通模式：如果索引超过配置数量，游戏胜利
             if (currentRoundIndex >= currentRoundsConfig.Count)
             {
                 HandleVictory();
@@ -115,53 +113,59 @@ public class GameRoundManager : MonoBehaviour
 
         currentState = GameState.Spawning;
 
-        // --- ⭐ 修改：计算当前回合数据 ---
-        RoundData currentRoundData;
+        // --- ⭐ 1. 计算本回合的目标数据 ---
+        int missionTargetCount = 0; // 玩家必须击杀的数量
 
         if (isEndlessMode)
         {
-            // 无尽模式：程序化生成数据
-            currentRoundData = new RoundData();
-            currentRoundData.roundName = $"Wave {currentRoundIndex + 1} (Endless)";
+            // 无尽模式计算
+            currentRoundNameDisplay = $"wave {currentRoundIndex + 1} (endless)";
 
-            // 算法：基础数量 + (回合数 * 系数)
-            // 例如：5 + (0 * 2) = 5
-            // 例如：5 + (5 * 2) = 15
             int baseCount = GameSettings.Instance ? GameSettings.Instance.endlessBaseEnemyCount : 5;
             float factor = GameSettings.Instance ? GameSettings.Instance.endlessGrowthFactor : 1.5f;
 
-            currentRoundData.enemyCount = Mathf.FloorToInt(baseCount + (currentRoundIndex * factor));
+            missionTargetCount = Mathf.FloorToInt(baseCount + (currentRoundIndex * factor));
         }
         else
         {
-            // 普通模式：直接读取
-            currentRoundData = currentRoundsConfig[currentRoundIndex];
+            // 普通模式读取
+            RoundData data = currentRoundsConfig[currentRoundIndex];
+            currentRoundNameDisplay = data.roundName;
+            missionTargetCount = data.enemyCount;
         }
 
-        UpdateUI(currentRoundData.roundName);
-        Debug.Log($"⚔️ 开始回合: {currentRoundData.roundName}, 敌人: {currentRoundData.enemyCount}");
+        // --- ⭐ 2. 设置游戏状态 (UI显示剩余击杀数) ---
+        // 我们只要求玩家击杀 missionTargetCount 个敌人
+        enemiesAlive = missionTargetCount;
+
+        // --- ⭐ 3. 执行生成 (生成数 = 目标数 + 缓冲数) ---
+        // 多生成 extraSpawnCount 个，防止玩家找不到
+        int actualSpawnCount = missionTargetCount + extraSpawnCount;
+
+        UpdateUI(currentRoundNameDisplay);
+        Debug.Log($"⚔️ 开始回合: {currentRoundNameDisplay}, 任务目标: {missionTargetCount}, 实际生成: {actualSpawnCount} (缓冲+{extraSpawnCount})");
 
         if (spawner != null)
         {
-            enemiesAlive = currentRoundData.enemyCount;
-            spawner.SpawnEnemies(currentRoundData.enemyCount);
+            spawner.SpawnEnemies(actualSpawnCount);
         }
 
         currentState = GameState.Fighting;
-        UpdateUI(currentRoundData.roundName);
+        UpdateUI(currentRoundNameDisplay);
     }
 
     public void OnEnemyKilled()
     {
         if (currentState != GameState.Fighting) return;
 
+        // 减少剩余需要击杀的数量
         enemiesAlive--;
         if (enemiesAlive < 0) enemiesAlive = 0;
 
         // 刷新UI显示
-        string roundName = isEndlessMode ? $" {currentRoundIndex + 1} " : currentRoundsConfig[currentRoundIndex].roundName;
-        if (gameInfoUI != null) gameInfoUI.UpdateInfo(roundName, enemiesAlive);
+        if (gameInfoUI != null) gameInfoUI.UpdateInfo(currentRoundNameDisplay, enemiesAlive);
 
+        // 如果击杀数达标 (enemiesAlive 归零)，即使场上还有那几个“缓冲用”的雪人，也直接结束
         if (enemiesAlive == 0)
         {
             EndRound();
@@ -170,12 +174,14 @@ public class GameRoundManager : MonoBehaviour
 
     private void EndRound()
     {
-        Debug.Log("🟢 回合结束");
+        Debug.Log("🟢 回合目标达成！结束回合。");
         currentState = GameState.UpgradePhase;
 
+        // ⭐ 关键：这里会清理掉场上所有剩下的雪人（包括那几个多生成的）
+        // 这样玩家就会觉得“我刚好杀完了所有怪”，体验非常流畅
         if (spawner != null) spawner.ClearAllSnowmen();
 
-        // 检查是否还有下一回合（无尽模式永远有，普通模式看列表）
+        // 检查是否还有下一回合
         bool hasNextRound = isEndlessMode || (currentRoundIndex < currentRoundsConfig.Count - 1);
 
         if (hasNextRound)

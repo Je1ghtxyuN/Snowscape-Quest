@@ -15,6 +15,8 @@ public class PlayerHealth : MonoBehaviour
     private GameObject deathUIInstance;
     private bool isDead = false;
 
+    public bool isInvincible = false;
+
     private float lastLowHealthVoiceTime = -999f;
     // 特效管理器引用
     private VRLensEffectManager lensEffectManager;
@@ -86,6 +88,13 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeDamage(float amount)
     {
+        if (isDead) return;
+
+        if (isInvincible)
+        {
+            return;
+        }
+
         if (!isDead)
         {
             healthSystem.TakeDamage(amount);

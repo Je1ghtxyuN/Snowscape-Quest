@@ -1,58 +1,69 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class SnowballCollision : MonoBehaviour
 {
-    [Header("»÷ÖĞÌØĞ§")]
+    [Header("å‡»ä¸­ç‰¹æ•ˆ")]
     public GameObject hitEffect;
 
-    // »ù´¡ÉËº¦
+    [Header("å‡»ä¸­éŸ³æ•ˆ")] // â­ æ–°å¢
+    public AudioClip impactSound; // â­ æ‹–å…¥é›ªçƒç¢è£‚çš„å£°éŸ³
+    [Range(0f, 1f)] public float soundVolume = 1.0f;
+
+    // åŸºç¡€ä¼¤å®³
     private float baseDamage = 20f;
 
     void OnCollisionEnter(Collision collision)
     {
         if (collision == null || collision.gameObject == null)
         {
-            Destroy(gameObject);
+            PlaySoundAndDestroy(); // â­ æ”¹ç”¨å°è£…æ–¹æ³•
             return;
         }
 
-        Destroy(gameObject);
-
+        // 1. ç”Ÿæˆç‰¹æ•ˆ
         if (hitEffect != null && collision.contacts.Length > 0)
         {
             GameObject effect = Instantiate(hitEffect, collision.contacts[0].point, Quaternion.identity);
             Destroy(effect, 2f);
         }
 
-        // ¼ÆËã×îÖÕÉËº¦£º»ù´¡ÉËº¦ * È«¾Ö±¶ÂÊ
+        // 2. è®¡ç®—ä¼¤å®³
         float multiplier = PlayerUpgradeHandler.Instance != null ? PlayerUpgradeHandler.Instance.damageMultiplier : 1f;
         float finalDamage = baseDamage * multiplier;
 
-        // 4. ´¦ÀíµĞÈËÅö×²
+        // 3. å¤„ç†æ•Œäººç¢°æ’
         if (collision.gameObject.CompareTag("Enemy"))
         {
-            // Debug.Log($"»÷ÖĞµĞÈË£¡Ôì³É {finalDamage} µãÉËº¦"); 
             EnemyHealth enemyScript = collision.gameObject.GetComponent<EnemyHealth>();
             EnemyBaofeng enemyBaofengScript = collision.gameObject.GetComponent<EnemyBaofeng>();
 
-            if (enemyScript != null)
-            {
-                enemyScript.TakeDamage(finalDamage);
-            }
-            else if (enemyBaofengScript != null)
-            {
-                enemyBaofengScript.TakeDamage(finalDamage);
-            }
+            if (enemyScript != null) enemyScript.TakeDamage(finalDamage);
+            else if (enemyBaofengScript != null) enemyBaofengScript.TakeDamage(finalDamage);
         }
-        // 5. ´¦ÀíÍæ¼ÒÅö×² (Íæ¼Ò±»ÔÒÒ»°ã²»ËãÉËº¦±¶ÂÊ£¬»òÕßÊÇµĞÈËÔÒµÄ)
+        // 4. å¤„ç†ç©å®¶ç¢°æ’
         else if (collision.gameObject.CompareTag("Player"))
         {
-            // ±£³ÖÔ­Ñù»ò¸ù¾İĞèÇóĞŞ¸Ä
             PlayerHealth playerScript = collision.gameObject.GetComponent<PlayerHealth>();
             if (playerScript != null)
             {
+                // ç©å®¶è¢«ç ¸å›ºå®šæ‰£20è¡€ï¼Œæˆ–è€…ä½ å¯ä»¥æ”¹æˆ enemyDamage
                 playerScript.TakeDamage(20f);
             }
         }
+
+        // 5. æ’­æ”¾å£°éŸ³å¹¶é”€æ¯
+        PlaySoundAndDestroy();
+    }
+
+    void PlaySoundAndDestroy()
+    {
+        // â­ æ ¸å¿ƒï¼šåœ¨é”€æ¯å‰ï¼Œåœ¨åŸåœ°æ’­æ”¾ä¸€ä¸ªå£°éŸ³
+        if (impactSound != null)
+        {
+            // PlayClipAtPoint ä¼šè‡ªåŠ¨åœ¨ä½ç½®å¤„ç”Ÿæˆä¸€ä¸ªä¸´æ—¶ AudioSource å¹¶åœ¨æ’­æ”¾å®Œåè‡ªåŠ¨é”€æ¯
+            AudioSource.PlayClipAtPoint(impactSound, transform.position, soundVolume);
+        }
+
+        Destroy(gameObject);
     }
 }
