@@ -12,6 +12,7 @@ public class PlayerUpgradeHandler : MonoBehaviour
     [SerializeField] private PlayerWeaponController weaponController;
     [SerializeField] private UnityEngine.XR.Interaction.Toolkit.Samples.StarterAssets.DynamicMoveProvider moveProvider;
 
+
     [Header("µ±«∞ Ù–‘")]
     public float damageMultiplier = 1.0f;
     public float speedMultiplier = 1.0f;

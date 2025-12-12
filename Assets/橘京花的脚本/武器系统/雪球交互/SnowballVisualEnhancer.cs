@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections; // 必须引用这个命名空间以使用协程
 
 [RequireComponent(typeof(TrailRenderer))]
 public class SnowballVisualEnhancer : MonoBehaviour
@@ -16,8 +17,12 @@ public class SnowballVisualEnhancer : MonoBehaviour
     [Tooltip("最终宽度")]
     public float widthLevelMax = 0.3f;
 
-    [Tooltip("是否只对玩家丢出的雪球生效？(如果不勾选，敌人的雪球也会变强)")]
+    [Tooltip("是否只对玩家丢出的雪球生效？")]
     public bool playerSnowballOnly = true;
+
+    [Header("防晃眼设置")]
+    [Tooltip("生成后延迟多少秒才显示拖尾？(防止刚生成时速度过快导致拖尾乱飞)")]
+    public float showTrailDelay = 0.5f;
 
     private TrailRenderer trail;
 
@@ -26,6 +31,10 @@ public class SnowballVisualEnhancer : MonoBehaviour
         trail = GetComponent<TrailRenderer>();
         if (trail == null) return;
 
+        // --- 1. 初始状态先禁用拖尾，防止刚生成时的乱飞 ---
+        trail.enabled = false;
+        trail.Clear(); // 清理掉可能存在的残留数据
+
         // 获取进度
         float progress = 0f;
         if (BurnRecoverySystem.Instance != null)
@@ -33,16 +42,31 @@ public class SnowballVisualEnhancer : MonoBehaviour
             progress = BurnRecoverySystem.Instance.GetRecoveryProgress();
         }
 
-        // 如果限制只对玩家生效，且当前物体层级或标签不是玩家的子弹，则不应用强化
-        // (这里假设你可能用 Tag 或 Layer 区分，如果没区分，就全部应用)
-        // 简单判断：如果进度 > 0，我们就应用效果
+        // 应用视觉参数 (虽然现在不可见，但参数先设好)
         ApplyVisuals(progress);
+
+        // --- 2. 开启协程，延迟显示 ---
+        StartCoroutine(EnableTrailAfterDelay());
+    }
+
+    // 延迟开启的协程
+    IEnumerator EnableTrailAfterDelay()
+    {
+        // 等待指定时间
+        yield return new WaitForSeconds(showTrailDelay);
+
+        if (trail != null)
+        {
+            // 重要：在开启前再次Clear，确保没有记录这0.5秒内的移动轨迹
+            // 否则开启瞬间会有一条线从出生点连到现在的位置
+            trail.Clear();
+            trail.enabled = true;
+        }
     }
 
     void ApplyVisuals(float progress)
     {
         // 1. 颜色渐变 (Color Lerp)
-        // 创建一个新的 Gradient
         Gradient gradient = new Gradient();
         Color currentColor = Color.Lerp(startColorLevel0, startColorLevelMax, progress);
 

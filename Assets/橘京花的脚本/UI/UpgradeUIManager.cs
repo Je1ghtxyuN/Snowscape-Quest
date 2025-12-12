@@ -17,12 +17,19 @@ public class UpgradeUIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI leftButtonText;
     [SerializeField] private TextMeshProUGUI rightButtonText;
 
+    [Header("特效引用 ")]
+    [SerializeField] private GameObject levelUpEffectPrefab;
+
+    [Tooltip("请选择地面的Layer")]
+    [SerializeField] private LayerMask groundLayer;
+
     [Header("升级池设置")]
     [SerializeField] private List<UpgradeOption> upgradePool = new List<UpgradeOption>();
 
     [Header("VR显示设置")]
     [SerializeField] private float displayDistance = 2f;
     [SerializeField] private float heightOffset = -0.3f;
+    [SerializeField] private float playerFeetOffset = -1.7f;
 
     private UpgradeOption currentLeftUpgrade;
     private UpgradeOption currentRightUpgrade;
@@ -117,6 +124,8 @@ public class UpgradeUIManager : MonoBehaviour
     {
         Debug.Log($"执行升级: {upgrade.id}");
 
+        SpawnVisualEffect();
+
         // 获取 PlayerUpgradeHandler 单例
         var handler = PlayerUpgradeHandler.Instance;
         if (handler == null)
@@ -159,6 +168,28 @@ public class UpgradeUIManager : MonoBehaviour
             default:
                 Debug.LogWarning("未知的升级ID");
                 break;
+        }
+    }
+
+    private void SpawnVisualEffect()
+    {
+        if (levelUpEffectPrefab != null && playerCamera != null)
+        {
+            // 1. 生成特效，并将 playerCamera 设置为父物体
+            // 这样特效就会随着相机（玩家）移动而移动
+            GameObject effect = Instantiate(levelUpEffectPrefab, playerCamera);
+
+            // 2. 设置局部坐标
+            // X=0, Z=0 保证光柱在玩家中心
+            // Y使用 playerFeetOffset (比如 -1.7)，让光柱脚底对齐玩家脚底
+            effect.transform.localPosition = new Vector3(0, playerFeetOffset, 0);
+
+            // 3. 重置旋转
+            effect.transform.localRotation = Quaternion.identity;
+        }
+        else
+        {
+            Debug.LogWarning("LevelUpEffectPrefab 未赋值 或 找不到玩家相机！");
         }
     }
 

@@ -7814,6 +7814,10 @@ MonoBehaviour:
   upgradePanel: {fileID: 8634681330098276650}
   leftButtonText: {fileID: 6430217496168793509}
   rightButtonText: {fileID: 6586665838376863644}
+  levelUpEffectPrefab: {fileID: 8250246423531800052, guid: 6b559313fd48f7e46bf760f5e6d2a87b, type: 3}
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 64
   upgradePool:
   - id: HEAL
     displayText: "\u51B0\u971C\u6CBB\u6108"
