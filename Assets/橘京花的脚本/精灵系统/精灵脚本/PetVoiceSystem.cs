@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -7,35 +7,61 @@ public class PetVoiceSystem : MonoBehaviour
 {
     public static PetVoiceSystem Instance { get; private set; }
 
+    // ä¾›å¤–éƒ¨æŸ¥è¯¢ï¼šæ˜¯å¦æ­£åœ¨è¯´è¯
+    public bool IsSpeaking
+    {
+        get { return audioSource != null && audioSource.isPlaying; }
+    }
+
     [System.Serializable]
     public struct VoiceClip
     {
-        public string id;       // ÓïÒôID (Èç "Start", "EnemySpotted")
-        public AudioClip clip;  // ÒôÆµÎÄ¼ş
-        [TextArea] public string subtitle; // ×ÖÄ» (¿ÉÑ¡)
+        public string id;
+        public AudioClip clip;
+        [TextArea] public string subtitle;
     }
 
-    [Header("ÓïÒô¿âÅäÖÃ")]
+    private struct QueuedVoice
+    {
+        public string id;
+        public float delay;
+
+        public QueuedVoice(string id, float delay)
+        {
+            this.id = id;
+            this.delay = delay;
+        }
+    }
+
+    [Header("è¯­éŸ³åº“é…ç½®")]
     public List<VoiceClip> voiceLibrary = new List<VoiceClip>();
 
+    [Header("éŸ³é‡è®¾ç½®")]
+    [Range(0f, 2f)]
+    public float masterVolume = 1.0f;
+
     private AudioSource audioSource;
-    private bool isSpeaking = false;
-
+    private Queue<QueuedVoice> voiceQueue = new Queue<QueuedVoice>();
+    private bool isProcessingQueue = false;
     private float lastEnemySpottedTime = -999f;
-
     private bool hasPlayedFirstDrop = false;
 
     void Awake()
     {
         Instance = this;
         audioSource = GetComponent<AudioSource>();
-        audioSource.spatialBlend = 1.0f; // 3DÒôĞ§£¬ÉùÒô´ÓĞ¡¾«Áé·¢³ö
+
+        audioSource.spatialBlend = 1.0f;
+        audioSource.minDistance = 5.0f;
+        audioSource.maxDistance = 100.0f;
+        audioSource.rolloffMode = AudioRolloffMode.Logarithmic;
     }
 
-    // ¹©Íâ²¿µ÷ÓÃ£ºPetVoiceSystem.Instance.PlayVoice("EnemyFound");
+    // --- æ’­æ”¾é€»è¾‘ä¿æŒä¸å˜ ---
     public void PlayVoice(string id, float delay = 0f)
     {
-        StartCoroutine(PlayVoiceRoutine(id, delay));
+        voiceQueue.Enqueue(new QueuedVoice(id, delay));
+        if (!isProcessingQueue) StartCoroutine(ProcessVoiceQueue());
     }
 
     public void TryPlayEnemySpottedVoice()
@@ -49,32 +75,29 @@ public class PetVoiceSystem : MonoBehaviour
 
     public void TryPlayFirstDropVoice()
     {
-        // Ö»ÓĞµ±±êÖ¾Î»Îª false (Ã»²¥¹ı) Ê±²Å²¥·Å
         if (!hasPlayedFirstDrop)
         {
             PlayVoice("First_Drop");
-            hasPlayedFirstDrop = true; // ËøËÀ£¬ÏÂ´Î²»ÔÙ²¥
+            hasPlayedFirstDrop = true;
         }
     }
 
-
-    private IEnumerator PlayVoiceRoutine(string id, float delay)
+    private IEnumerator ProcessVoiceQueue()
     {
-        if (delay > 0) yield return new WaitForSeconds(delay);
-
-        // ²éÕÒÓïÒô
-        VoiceClip target = voiceLibrary.Find(x => x.id == id);
-
-        // Èç¹ûÕıÔÚËµ»°£¬ÊÇ·ñ´ò¶Ï£¿ÕâÀïÑ¡Ôñ²»´ò¶Ï£¬»òÕßÄã¿ÉÒÔ¸ù¾İÓÅÏÈ¼¶´ò¶Ï
-        if (target.clip != null && !audioSource.isPlaying)
+        isProcessingQueue = true;
+        while (voiceQueue.Count > 0)
         {
-            audioSource.PlayOneShot(target.clip);
-            Debug.Log($"[Paimon]: {target.subtitle}");
-            // ÕâÀï¿ÉÒÔ¶Ô½ÓÄãµÄ×ÖÄ» UI ÏµÍ³
+            QueuedVoice currentRequest = voiceQueue.Dequeue();
+            if (currentRequest.delay > 0) yield return new WaitForSeconds(currentRequest.delay);
+
+            VoiceClip target = voiceLibrary.Find(x => x.id == currentRequest.id);
+            if (target.clip != null)
+            {
+                audioSource.PlayOneShot(target.clip, masterVolume);
+                yield return new WaitForSeconds(target.clip.length + 0.2f);
+            }
+            else yield return null;
         }
-        else
-        {
-            Debug.LogWarning($"ÓïÒôIDÎ´ÕÒµ½»òÕıÔÚËµ»°: {id}");
-        }
+        isProcessingQueue = false;
     }
 }

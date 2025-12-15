@@ -84,7 +84,7 @@ public class FootstepAudioPlayer : MonoBehaviour
         // 使用 OrdinalIgnoreCase 忽略大小写，这样 "snow", "Snow", "SNOW" 都可以识别
         if (currentSurfaceTag.Equals("Snow", System.StringComparison.OrdinalIgnoreCase))
         {
-            volumeScale = 0.6f; // 如果是雪地，音量设为 0.6
+            volumeScale = 0.4f; // 如果是雪地，音量设为 0.6
         }
         // 你可以在这里继续添加其他 else if ...
 

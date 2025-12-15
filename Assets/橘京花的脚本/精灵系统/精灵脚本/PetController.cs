@@ -1,30 +1,40 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class PetController : MonoBehaviour
 {
-    [Header("¸úËæÉèÖÃ")]
-    public Transform playerHead; // ±ØĞë¸³Öµ£ºÍæ¼ÒµÄÍ·²¿ÉãÏñ»ú
-    public Vector3 targetOffset = new Vector3(0.8f, 0.2f, 0.5f); // Ä¿±êÎ»ÖÃ£ºÍæ¼ÒÓÒ²àÉÏ·½
+    [Header("è·Ÿéšè®¾ç½®")]
+    public Transform playerHead;
+    public Vector3 targetOffset = new Vector3(0.8f, 0.2f, 0.5f);
     public float smoothTime = 0.5f;
     public float rotationSpeed = 5f;
 
-    [Header("Ğü¸¡ºôÎü¸Ğ")]
-    public float floatAmplitude = 0.1f; // ÉÏÏÂ¸¡¶¯·ù¶È
-    public float floatFrequency = 1.5f; // ¸¡¶¯ÆµÂÊ
+    [Header("æ‚¬æµ®å‘¼å¸æ„Ÿ")]
+    public float floatAmplitude = 0.1f;
+    public float floatFrequency = 1.5f;
 
-    [Header("×´Ì¬")]
-    public bool isBusy = false; // Èç¹ûÔÚ×ö¶¯×÷£¨Èç¹¥»÷£©£¬ÔİÍ£¸úËæÂß¼­
+    [Header("æ¨¡å‹æœå‘ä¿®æ­£ (å…³é”®)")]
+    [Tooltip("å¦‚æœæ˜¯ä¾§èº«æ¨¡å‹å¡«90/-90ï¼Œå±è‚¡å¯¹äººå¡«180")]
+    [Range(-180f, 180f)]
+    public float modelRotationOffset = 0f;
+
+    [Header("çŠ¶æ€")]
+    public bool isBusy = false;
 
     private Vector3 currentVelocity;
     private Vector3 floatOffset;
 
     void Start()
     {
-        if (playerHead == null)
+        if (playerHead == null && Camera.main != null)
+            playerHead = Camera.main.transform;
+
+        // â­ æ¸¸æˆå¼€å§‹ç¬é—´ï¼šå¼ºåˆ¶ç¬ç§»åˆ°ç›®æ ‡ä½ç½®å¹¶å¼ºåˆ¶å¯¹é½æœå‘
+        // è¿™æ ·ä¸€å¼€å§‹å°±ä¸ä¼šå‡ºç°ç²¾çµåœ¨å¥‡æ€ªä½ç½®æˆ–æ…¢æ…¢è½¬å¤´çš„æƒ…å†µ
+        if (playerHead != null)
         {
-            // ³¢ÊÔ×Ô¶¯²éÕÒ VR ÉãÏñ»ú
-            Camera mainCam = Camera.main;
-            if (mainCam != null) playerHead = mainCam.transform;
+            Vector3 startPos = playerHead.TransformPoint(targetOffset);
+            transform.position = startPos;
+            HandleRotation(true); // true = ç¬é—´å®Œæˆ
         }
     }
 
@@ -32,24 +42,64 @@ public class PetController : MonoBehaviour
     {
         if (playerHead == null || isBusy) return;
 
-        // 1. ¼ÆËãÄ¿±êÎ»ÖÃ (Ê¼ÖÕÔÚÍæ¼ÒÍ·²¿µÄÏà¶ÔÎ»ÖÃ)
-        // Ê¹ÓÃ TransformPoint ½«¾Ö²¿×ø±ê×ªÎªÊÀ½ç×ø±ê
+        HandleMovement();
+        HandleRotation(false); // false = å¹³æ»‘æ—‹è½¬
+    }
+
+    void HandleMovement()
+    {
+        // 1. è®¡ç®—åŸºç¡€ç›®æ ‡ä½ç½®
         Vector3 targetPos = playerHead.TransformPoint(targetOffset);
 
-        // 2. Ìí¼ÓĞü¸¡ºôÎü¸Ğ (ÕıÏÒ²¨)
+        // 2. å åŠ å‘¼å¸æµ®åŠ¨
         floatOffset.y = Mathf.Sin(Time.time * floatFrequency) * floatAmplitude;
         Vector3 finalTarget = targetPos + floatOffset;
 
-        // 3. Æ½»¬×èÄáÒÆ¶¯ (±È Lerp ¸ü×ÔÈ»£¬´øÓĞ¹ßĞÔ)
+        // 3. å¹³æ»‘ç§»åŠ¨
         transform.position = Vector3.SmoothDamp(transform.position, finalTarget, ref currentVelocity, smoothTime);
+    }
 
-        // 4. ÃæÏò£ºÊ¼ÖÕÎÂÈáµØ¿´ÏòÍæ¼ÒµÄÁ³£¬µ«±£³Ö Y ÖáÖ±Á¢
-        Vector3 lookDir = playerHead.position - transform.position;
-        lookDir.y = 0; // Ëø¶¨ Y Öá£¬·ÀÖ¹ÍáÍ·
-        if (lookDir != Vector3.zero)
+    void HandleRotation(bool isInstant)
+    {
+        Vector3 targetLookDir;
+
+        // â­ é€»è¾‘æ•´åˆï¼šä» VoiceSystem è·å–çŠ¶æ€
+        bool isTalking = false;
+        if (PetVoiceSystem.Instance != null)
+            isTalking = PetVoiceSystem.Instance.IsSpeaking;
+
+        // 1. ç¡®å®šæˆ‘ä»¬è¦çœ‹å“ªé‡Œ
+        if (isTalking)
         {
-            Quaternion targetRot = Quaternion.LookRotation(lookDir);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotationSpeed * Time.deltaTime);
+            // è¯´è¯æ—¶ï¼šçœ‹ç€ç©å®¶
+            targetLookDir = playerHead.position - transform.position;
+        }
+        else
+        {
+            // ä¸è¯´è¯æ—¶ï¼šçœ‹ç€å‰æ–¹ï¼ˆå’Œç©å®¶åŒå‘ï¼‰
+            targetLookDir = playerHead.forward;
+        }
+
+        // 2. é”å®šYè½´ (é˜²æ­¢æŠ¬å¤´ä½å¤´)
+        targetLookDir.y = 0;
+
+        // 3. è®¡ç®—æ—‹è½¬
+        if (targetLookDir.sqrMagnitude > 0.001f)
+        {
+            Quaternion lookRot = Quaternion.LookRotation(targetLookDir);
+
+            // â­ åº”ç”¨ä½ çš„ä¿®æ­£è§’åº¦ (è¿™é‡Œæ˜¯è§£å†³é—®é¢˜çš„å…³é”®)
+            // å…ˆçœ‹å‘ç›®æ ‡ï¼Œå†å åŠ è‡ªèº«çš„ä¿®æ­£æ—‹è½¬
+            Quaternion finalRot = lookRot * Quaternion.Euler(0, modelRotationOffset, 0);
+
+            if (isInstant)
+            {
+                transform.rotation = finalRot;
+            }
+            else
+            {
+                transform.rotation = Quaternion.Slerp(transform.rotation, finalRot, rotationSpeed * Time.deltaTime);
+            }
         }
     }
 }

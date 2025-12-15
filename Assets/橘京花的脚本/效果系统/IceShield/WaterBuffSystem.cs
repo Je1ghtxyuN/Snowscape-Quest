@@ -4,14 +4,16 @@ using System.Collections;
 public class WaterBuffSystem : MonoBehaviour
 {
     [Header("设置")]
-    public string waterTag = "Water"; // 记得给水体设置 Tag
+    public string waterTag = "water"; 
+    [Tooltip("离开水面后，护盾还能维持多久")]
     public float buffDuration = 20f;
 
     [Header("组件引用")]
     public PlayerHealth playerHealth;
     public IceArmorVisuals armorVisuals;
 
-    private Coroutine buffCoroutine;
+    // 用来存储“正在进行的倒计时”，以便随时打断它
+    private Coroutine disableCoroutine;
 
     void Start()
     {
@@ -19,41 +21,85 @@ public class WaterBuffSystem : MonoBehaviour
         if (armorVisuals == null) armorVisuals = GetComponentInParent<IceArmorVisuals>();
     }
 
+    // 1. 进入或者待在水里时：开启护盾，并打断消失倒计时
     private void OnTriggerEnter(Collider other)
     {
-        // 检测是否碰到水
         if (other.CompareTag(waterTag))
         {
-            ActivateShield();
+            HandleEnterWater();
         }
     }
 
-    public void ActivateShield()
+    // (可选) 为了防止Enter漏检测，Stay也可以加一份保障
+    private void OnTriggerStay(Collider other)
     {
-        // 如果正在进行，重置时间
-        if (buffCoroutine != null) StopCoroutine(buffCoroutine);
-
-        buffCoroutine = StartCoroutine(ShieldRoutine());
+        if (other.CompareTag(waterTag))
+        {
+            // 如果倒计时正在跑（说明刚才可能误判退出了），立刻取消倒计时重置状态
+            if (disableCoroutine != null)
+            {
+                HandleEnterWater();
+            }
+        }
     }
 
-    private IEnumerator ShieldRoutine()
+    // 2. 离开水面时：开始消失倒计时
+    private void OnTriggerExit(Collider other)
     {
-        Debug.Log("🛡️ 获得冰霜护盾！无敌 20秒！");
+        if (other.CompareTag(waterTag))
+        {
+            HandleExitWater();
+        }
+    }
 
-        // 1. 开启无敌
-        if (playerHealth != null) playerHealth.isInvincible = true;
+    private void HandleEnterWater()
+    {
+        // 如果之前正在准备取消护盾，立刻“撤回”这个命令
+        if (disableCoroutine != null)
+        {
+            StopCoroutine(disableCoroutine);
+            disableCoroutine = null;
+        }
 
-        // 2. 开启视觉特效 (生成蓝色大手)
-        if (armorVisuals != null) armorVisuals.EnableArmor();
+        // 确保护盾是开启状态
+        EnableShieldStatus(true);
 
-        // 3. 倒计时
+        Debug.Log("🌊 接触水源：护盾持续保持中...");
+    }
+
+    private void HandleExitWater()
+    {
+        // 只有当前没有在倒计时的时候，才开启一个新的倒计时
+        if (disableCoroutine == null)
+        {
+            disableCoroutine = StartCoroutine(DisableShieldCountdown());
+        }
+    }
+
+    // 开启或关闭护盾的具体逻辑封装
+    private void EnableShieldStatus(bool isActive)
+    {
+        if (playerHealth != null) playerHealth.isInvincible = isActive;
+
+        if (armorVisuals != null)
+        {
+            if (isActive) armorVisuals.EnableArmor();
+            else armorVisuals.DisableArmor();
+        }
+    }
+
+    private IEnumerator DisableShieldCountdown()
+    {
+        Debug.Log($"⏳ 离开水源：护盾将在 {buffDuration} 秒后消失...");
+
+        // 等待倒计时
         yield return new WaitForSeconds(buffDuration);
 
-        // 4. 结束
-        Debug.Log("🛡️ 冰霜护盾消失...");
-        if (playerHealth != null) playerHealth.isInvincible = false;
-        if (armorVisuals != null) armorVisuals.DisableArmor();
+        // 时间到，关闭护盾
+        Debug.Log("🛡️ 冰霜护盾效果结束");
+        EnableShieldStatus(false);
 
-        buffCoroutine = null;
+        // 清空协程引用
+        disableCoroutine = null;
     }
 }

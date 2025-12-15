@@ -153,11 +153,11 @@ Material:
     - _NormalPower: 1
     - _NormalPower1: 1
     - _NormalScale: 0.5
-    - _NormalSpeed: 1
+    - _NormalSpeed: 1.2
     - _NormalTiling: 0.05
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _RefractionPower: 0.88
+    - _RefractionPower: 0
     - _SmoothnessPower: 1
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1

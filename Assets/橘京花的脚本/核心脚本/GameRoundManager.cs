@@ -74,8 +74,8 @@ public class GameRoundManager : MonoBehaviour
         if (PetVoiceSystem.Instance != null)
         {
             PetVoiceSystem.Instance.PlayVoice("Start", 1.0f);
-            PetVoiceSystem.Instance.PlayVoice("Tutorial_Move", 24.5f);
-            PetVoiceSystem.Instance.PlayVoice("Tutorial_Look", 34.5f);
+            PetVoiceSystem.Instance.PlayVoice("Tutorial_Move", 1.5f);
+            PetVoiceSystem.Instance.PlayVoice("Tutorial_Look", 1.0f);
         }
 
         StartCoroutine(WaitAndStartGameRoutine());
