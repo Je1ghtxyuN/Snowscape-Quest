@@ -5,8 +5,8 @@ public class GameInfoUI : MonoBehaviour
 {
     [Header("UI设置")]
     [SerializeField] private GameObject uiPrefab; // 以前的分数UI预制体
-    [SerializeField] private Vector3 uiOffset = new Vector3(0, 0.3f, 0);
-    [SerializeField] private float uiScale = 0.002f;
+    [SerializeField] private Vector3 uiOffset = new Vector3(0, 0.28f, 0);
+    [SerializeField] private float uiScale = 0.001f;
 
     private Camera vrCamera;
     private GameObject uiInstance;

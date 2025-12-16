@@ -547,7 +547,7 @@ GameObject:
   - component: {fileID: 359269217875180122}
   - component: {fileID: 6653088886009426825}
   m_Layer: 11
-  m_Name: polySurface129
+  m_Name: Scarf
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1916,7 +1916,7 @@ GameObject:
   - component: {fileID: 8633814830081826163}
   - component: {fileID: 3242975079301884419}
   m_Layer: 11
-  m_Name: polySurface83
+  m_Name: Hat
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

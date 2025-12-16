@@ -114,11 +114,10 @@ public class GameRoundManager : MonoBehaviour
         currentState = GameState.Spawning;
 
         // --- ⭐ 1. 计算本回合的目标数据 ---
-        int missionTargetCount = 0; // 玩家必须击杀的数量
+        int missionTargetCount = 0;
 
         if (isEndlessMode)
         {
-            // 无尽模式计算
             currentRoundNameDisplay = $"wave {currentRoundIndex + 1} (endless)";
 
             int baseCount = GameSettings.Instance ? GameSettings.Instance.endlessBaseEnemyCount : 5;
@@ -128,22 +127,19 @@ public class GameRoundManager : MonoBehaviour
         }
         else
         {
-            // 普通模式读取
             RoundData data = currentRoundsConfig[currentRoundIndex];
             currentRoundNameDisplay = data.roundName;
             missionTargetCount = data.enemyCount;
         }
 
-        // --- ⭐ 2. 设置游戏状态 (UI显示剩余击杀数) ---
-        // 我们只要求玩家击杀 missionTargetCount 个敌人
+        // --- ⭐ 2. 设置游戏状态 ---
         enemiesAlive = missionTargetCount;
 
-        // --- ⭐ 3. 执行生成 (生成数 = 目标数 + 缓冲数) ---
-        // 多生成 extraSpawnCount 个，防止玩家找不到
+        // --- ⭐ 3. 执行生成 ---
         int actualSpawnCount = missionTargetCount + extraSpawnCount;
 
         UpdateUI(currentRoundNameDisplay);
-        Debug.Log($"⚔️ 开始回合: {currentRoundNameDisplay}, 任务目标: {missionTargetCount}, 实际生成: {actualSpawnCount} (缓冲+{extraSpawnCount})");
+        Debug.Log($"⚔️ 开始回合: {currentRoundNameDisplay}, 任务目标: {missionTargetCount}, 实际生成: {actualSpawnCount}");
 
         if (spawner != null)
         {
@@ -165,7 +161,7 @@ public class GameRoundManager : MonoBehaviour
         // 刷新UI显示
         if (gameInfoUI != null) gameInfoUI.UpdateInfo(currentRoundNameDisplay, enemiesAlive);
 
-        // 如果击杀数达标 (enemiesAlive 归零)，即使场上还有那几个“缓冲用”的雪人，也直接结束
+        // 如果击杀数达标
         if (enemiesAlive == 0)
         {
             EndRound();
@@ -177,8 +173,6 @@ public class GameRoundManager : MonoBehaviour
         Debug.Log("🟢 回合目标达成！结束回合。");
         currentState = GameState.UpgradePhase;
 
-        // ⭐ 关键：这里会清理掉场上所有剩下的雪人（包括那几个多生成的）
-        // 这样玩家就会觉得“我刚好杀完了所有怪”，体验非常流畅
         if (spawner != null) spawner.ClearAllSnowmen();
 
         // 检查是否还有下一回合
@@ -186,6 +180,8 @@ public class GameRoundManager : MonoBehaviour
 
         if (hasNextRound)
         {
+
+
             if (upgradeUI != null) upgradeUI.ShowUpgradePanel();
             else FinishUpgrade();
         }

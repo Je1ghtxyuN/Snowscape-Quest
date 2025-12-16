@@ -404,3 +404,4 @@ MonoBehaviour:
   widthLevel0: 0.1
   widthLevelMax: 0.3
   playerSnowballOnly: 1
+  showTrailDelay: 0.5

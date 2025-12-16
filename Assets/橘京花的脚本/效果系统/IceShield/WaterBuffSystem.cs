@@ -4,7 +4,7 @@ using System.Collections;
 public class WaterBuffSystem : MonoBehaviour
 {
     [Header("设置")]
-    public string waterTag = "water"; 
+    public string waterTag = "water"; // 注意大小写，你的截图里Tag是小写water
     [Tooltip("离开水面后，护盾还能维持多久")]
     public float buffDuration = 20f;
 
@@ -21,7 +21,7 @@ public class WaterBuffSystem : MonoBehaviour
         if (armorVisuals == null) armorVisuals = GetComponentInParent<IceArmorVisuals>();
     }
 
-    // 1. 进入或者待在水里时：开启护盾，并打断消失倒计时
+    // 1. 进入或者待在水里时：开启护盾
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag(waterTag))
@@ -30,12 +30,10 @@ public class WaterBuffSystem : MonoBehaviour
         }
     }
 
-    // (可选) 为了防止Enter漏检测，Stay也可以加一份保障
     private void OnTriggerStay(Collider other)
     {
         if (other.CompareTag(waterTag))
         {
-            // 如果倒计时正在跑（说明刚才可能误判退出了），立刻取消倒计时重置状态
             if (disableCoroutine != null)
             {
                 HandleEnterWater();
@@ -64,7 +62,13 @@ public class WaterBuffSystem : MonoBehaviour
         // 确保护盾是开启状态
         EnableShieldStatus(true);
 
-        Debug.Log("🌊 接触水源：护盾持续保持中...");
+        // ⭐ 改动：只播放一次“获得护甲”的语音
+        if (PlayerVoiceSystem.Instance != null)
+        {
+            PlayerVoiceSystem.Instance.PlayVoiceOnce("Ice_Armor");
+        }
+
+        // Debug.Log("🌊 接触水源：护盾持续保持中...");
     }
 
     private void HandleExitWater()
@@ -92,6 +96,12 @@ public class WaterBuffSystem : MonoBehaviour
     {
         Debug.Log($"⏳ 离开水源：护盾将在 {buffDuration} 秒后消失...");
 
+        // ⭐ 改动：只播放一次“离开水流”的语音
+        if (PlayerVoiceSystem.Instance != null)
+        {
+            PlayerVoiceSystem.Instance.PlayVoiceOnce("Leave_Water");
+        }
+
         // 等待倒计时
         yield return new WaitForSeconds(buffDuration);
 
@@ -99,7 +109,6 @@ public class WaterBuffSystem : MonoBehaviour
         Debug.Log("🛡️ 冰霜护盾效果结束");
         EnableShieldStatus(false);
 
-        // 清空协程引用
         disableCoroutine = null;
     }
 }

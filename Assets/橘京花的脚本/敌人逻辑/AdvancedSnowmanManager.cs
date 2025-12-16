@@ -15,9 +15,24 @@ public class AdvancedSnowmanManager : MonoBehaviour
     [Header("区域设置")]
     public List<string> allowedAreas = new List<string>();
 
+    [Header("🎨 雪人外观多样性设置")]
+    [Tooltip("雪人模型里帽子的物体名称 (一定要和Hierarchy里的一致)")]
+    public string hatObjectName = "Hat";
+    [Tooltip("帽子出现的概率 (0-1)，1表示必定有帽子")]
+    [Range(0f, 1f)] public float hatChance = 0.8f;
+    [Tooltip("帽子可能出现的颜色")]
+    public Color[] hatColors = new Color[] { Color.red, Color.blue, Color.green, Color.black };
+
+    [Space(10)]
+    [Tooltip("雪人模型里围巾的物体名称")]
+    public string scarfObjectName = "Scarf";
+    [Tooltip("围巾出现的概率 (0-1)")]
+    [Range(0f, 1f)] public float scarfChance = 0.8f;
+    [Tooltip("围巾可能出现的颜色")]
+    public Color[] scarfColors = new Color[] { Color.yellow, Color.cyan, Color.magenta, Color.white };
+
     private AdvancedGameAreaManager areaManager;
     private Transform player;
-    // 列表用于管理当前存在的雪人
     private List<GameObject> currentSnowmen = new List<GameObject>();
 
     void Awake()
@@ -29,10 +44,8 @@ public class AdvancedSnowmanManager : MonoBehaviour
         if (areaManager == null) Debug.LogError("❌ 未找到 AdvancedGameAreaManager！");
     }
 
-    // ⭐ 修改：不再在 Start 中自动生成，而是由 GameManager 调用
     public void SpawnEnemies(int count)
     {
-        // 清理上一轮可能残留的雪人（理论上都被打死了，但为了安全）
         ClearDeadSnowmen();
 
         if (player == null || areaManager == null) return;
@@ -42,22 +55,84 @@ public class AdvancedSnowmanManager : MonoBehaviour
         if (spawnPositions.Count == 0)
         {
             Debug.LogWarning("⚠️ 未能生成任何有效的雪人位置。");
-            // 极端情况补救：如果生成失败，也要通知管理器减少存活数，否则游戏会卡死
             for (int i = 0; i < count; i++) GameRoundManager.Instance.OnEnemyKilled();
             return;
         }
 
-        // 如果生成点少于请求数（位置不够），把没生成的补上死亡计数
         int missingCount = count - spawnPositions.Count;
         for (int i = 0; i < missingCount; i++) GameRoundManager.Instance.OnEnemyKilled();
 
         foreach (Vector3 position in spawnPositions)
         {
             GameObject snowman = Instantiate(snowmanPrefab, position, Quaternion.identity);
+
+            // ⭐ 新增：生成后立即进行随机化外观处理
+            RandomizeSnowmanAppearance(snowman);
+
             currentSnowmen.Add(snowman);
         }
 
         Debug.Log($"✅ 本回合成功生成 {spawnPositions.Count} 个雪人");
+    }
+
+    // ⭐⭐ 核心功能：随机化外观 ⭐⭐
+    private void RandomizeSnowmanAppearance(GameObject snowman)
+    {
+        // 1. 处理帽子
+        ApplyRandomAccessory(snowman, hatObjectName, hatChance, hatColors);
+
+        // 2. 处理围巾
+        ApplyRandomAccessory(snowman, scarfObjectName, scarfChance, scarfColors);
+    }
+
+    private void ApplyRandomAccessory(GameObject snowman, string partName, float chance, Color[] colors)
+    {
+        // 递归查找子物体，防止物体藏在层级深处
+        Transform partTrans = FindDeepChild(snowman.transform, partName);
+
+        if (partTrans != null)
+        {
+            GameObject partObj = partTrans.gameObject;
+
+            // A. 随机决定是否有这个部位
+            bool hasPart = Random.value < chance;
+            partObj.SetActive(hasPart);
+
+            // B. 如果有，随机颜色
+            if (hasPart && colors.Length > 0)
+            {
+                Renderer rend = partObj.GetComponent<Renderer>();
+                if (rend != null)
+                {
+                    Color randomColor = colors[Random.Range(0, colors.Length)];
+
+                    // 使用 PropertyBlock 修改颜色，性能更好且不会导致材质球内存泄漏
+                    MaterialPropertyBlock propBlock = new MaterialPropertyBlock();
+                    rend.GetPropertyBlock(propBlock);
+
+                    // 自动尝试匹配常见的颜色属性名 (兼容 URP / Built-in / ShaderGraph)
+                    if (rend.material.HasProperty("_BaseColor"))
+                        propBlock.SetColor("_BaseColor", randomColor);
+                    else if (rend.material.HasProperty("_Color"))
+                        propBlock.SetColor("_Color", randomColor);
+
+                    rend.SetPropertyBlock(propBlock);
+                }
+            }
+        }
+        // else { Debug.LogWarning($"在雪人身上没找到名为 '{partName}' 的物体，请检查名称设置"); }
+    }
+
+    // 辅助工具：递归查找子物体
+    private Transform FindDeepChild(Transform parent, string name)
+    {
+        foreach (Transform child in parent)
+        {
+            if (child.name == name) return child;
+            Transform result = FindDeepChild(child, name);
+            if (result != null) return result;
+        }
+        return null;
     }
 
     private List<Vector3> GenerateValidSpawnPositions(int count)
@@ -146,7 +221,7 @@ public class AdvancedSnowmanManager : MonoBehaviour
         }
         return true;
     }
-        
+
     private void ClearDeadSnowmen()
     {
         for (int i = currentSnowmen.Count - 1; i >= 0; i--)

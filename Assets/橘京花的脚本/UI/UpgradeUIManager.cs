@@ -175,6 +175,11 @@ public class UpgradeUIManager : MonoBehaviour
     {
         if (levelUpEffectPrefab != null && playerCamera != null)
         {
+            // ⭐ 新增：播放升级/光柱环绕的心理暗示语音
+            if (PlayerVoiceSystem.Instance != null)
+            {
+                PlayerVoiceSystem.Instance.PlayVoice("Level_Up");
+            }
             // 1. 生成特效，并将 playerCamera 设置为父物体
             // 这样特效就会随着相机（玩家）移动而移动
             GameObject effect = Instantiate(levelUpEffectPrefab, playerCamera);
