@@ -42,8 +42,6 @@ public class BurnRecoverySystem : MonoBehaviour
     private bool _lastDebugState = false;
     private int idBaseColor;
     private int idEmissionColor;
-
-    // ⭐ 新增：防止语音重复播放的开关
     private bool hasPlayedRecoveryVoice = false;
 
     void Awake()
@@ -56,11 +54,30 @@ public class BurnRecoverySystem : MonoBehaviour
     {
         CreateRecoveryUI();
         InitializeMaterial();
-        UpdateVisuals(0);
+
+        // ⭐ 修改：如果是对照组，直接设置为终点状态（或者你希望的无特效状态）
+        if (ExperimentVisualControl.Instance != null && !ExperimentVisualControl.Instance.ShouldShowVisuals())
+        {
+            // 强制设置为健康状态，不显示烧伤
+            UpdateVisuals(1.0f);
+            // 立即应用一次
+            if (runtimeMaterial != null)
+            {
+                runtimeMaterial.SetColor(idBaseColor, currentTargetBase);
+                runtimeMaterial.SetColor(idEmissionColor, currentTargetEmission);
+            }
+        }
+        else
+        {
+            UpdateVisuals(0);
+        }
     }
 
     void Update()
     {
+        // ⭐ 修改：对照组不执行任何材质 Lerp 更新
+        if (ExperimentVisualControl.Instance != null && !ExperimentVisualControl.Instance.ShouldShowVisuals()) return;
+
         if (debugPreviewFinalEffect != _lastDebugState)
         {
             _lastDebugState = debugPreviewFinalEffect;
@@ -82,24 +99,22 @@ public class BurnRecoverySystem : MonoBehaviour
     public void AddRecoveryProgress()
     {
         currentCrystals++;
-
         float progress = GetRecoveryProgress();
 
-        if (!debugPreviewFinalEffect)
+        // ⭐ 修改：对照组不更新视觉目标值，只跑逻辑
+        if (ExperimentVisualControl.Instance == null || ExperimentVisualControl.Instance.ShouldShowVisuals())
         {
-            UpdateVisuals(progress);
+            if (!debugPreviewFinalEffect) UpdateVisuals(progress);
         }
 
-        // ⭐ 新增逻辑：检查是否达到 100% 且没有播放过语音
+        // 语音逻辑保留 (心理暗示属于听觉，通常对照组也保留，或者你可以根据需求在这里也加判断)
         if (progress >= 1.0f && !hasPlayedRecoveryVoice)
         {
             if (PlayerVoiceSystem.Instance != null)
             {
-                // 播放身体完全恢复的语音
                 PlayerVoiceSystem.Instance.PlayVoice("Full_Recovery");
             }
-            hasPlayedRecoveryVoice = true; // 锁死，防止吃第11个水晶时又播一遍
-            Debug.Log("❄️ 身体完全恢复！播放暗示语音。");
+            hasPlayedRecoveryVoice = true;
         }
     }
 
@@ -111,7 +126,9 @@ public class BurnRecoverySystem : MonoBehaviour
 
     private void UpdateVisuals(float progress)
     {
+        // UI 进度条可能需要保留？如果连UI也要隐藏，可以在这里加判断
         if (bodyFillImage != null) bodyFillImage.fillAmount = progress;
+
         currentTargetBase = Color.Lerp(originalBaseColor * burnTint, originalBaseColor * healthyColdTint, progress);
         currentTargetEmission = Color.Lerp(burnEmission, healthyEmission, progress);
     }
@@ -160,6 +177,9 @@ public class BurnRecoverySystem : MonoBehaviour
             Image[] images = uiInstance.GetComponentsInChildren<Image>();
             foreach (var img in images) if (img.type == Image.Type.Filled) { bodyFillImage = img; break; }
         }
+
+        // ⭐ 修改：如果是对照组，可能隐藏UI？这里暂且保留UI，只隐藏材质特效。
+        // 如果想隐藏UI，加一句: if(!ExperimentVisualControl.Instance.ShouldShowVisuals()) uiInstance.SetActive(false);
     }
 
     private Transform FindDeepChild(Transform parent, string name)

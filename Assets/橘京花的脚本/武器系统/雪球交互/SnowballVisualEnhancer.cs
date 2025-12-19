@@ -1,27 +1,16 @@
-using UnityEngine;
-using System.Collections; // ±ØĞëÒıÓÃÕâ¸öÃüÃû¿Õ¼äÒÔÊ¹ÓÃĞ­³Ì
+ï»¿using UnityEngine;
+using System.Collections;
 
 [RequireComponent(typeof(TrailRenderer))]
 public class SnowballVisualEnhancer : MonoBehaviour
 {
-    [Header("ÍÏÎ²Éı¼¶ÉèÖÃ")]
-    [Tooltip("³õÊ¼ÑÕÉ« (¿µ¸´½ø¶È 0)")]
-    public Color startColorLevel0 = new Color(1f, 1f, 1f, 0.5f); // °×É«Î¢Í¸
-
-    [Tooltip("×îÖÕÑÕÉ« (¿µ¸´½ø¶È 1)")]
-    [ColorUsage(true, true)] // ÔÊĞíHDR¸ßÁÁ
-    public Color startColorLevelMax = new Color(0f, 1f, 1f, 1f); // ÇàÉ«·¢¹â
-
-    [Tooltip("³õÊ¼¿í¶È")]
+    [Header("æ‹–å°¾å‡çº§è®¾ç½®")]
+    public Color startColorLevel0 = new Color(1f, 1f, 1f, 0.5f);
+    [ColorUsage(true, true)]
+    public Color startColorLevelMax = new Color(0f, 1f, 1f, 1f);
     public float widthLevel0 = 0.1f;
-    [Tooltip("×îÖÕ¿í¶È")]
     public float widthLevelMax = 0.3f;
-
-    [Tooltip("ÊÇ·ñÖ»¶ÔÍæ¼Ò¶ª³öµÄÑ©ÇòÉúĞ§£¿")]
     public bool playerSnowballOnly = true;
-
-    [Header("·À»ÎÑÛÉèÖÃ")]
-    [Tooltip("Éú³ÉºóÑÓ³Ù¶àÉÙÃë²ÅÏÔÊ¾ÍÏÎ²£¿(·ÀÖ¹¸ÕÉú³ÉÊ±ËÙ¶È¹ı¿ìµ¼ÖÂÍÏÎ²ÂÒ·É)")]
     public float showTrailDelay = 0.5f;
 
     private TrailRenderer trail;
@@ -31,34 +20,32 @@ public class SnowballVisualEnhancer : MonoBehaviour
         trail = GetComponent<TrailRenderer>();
         if (trail == null) return;
 
-        // --- 1. ³õÊ¼×´Ì¬ÏÈ½ûÓÃÍÏÎ²£¬·ÀÖ¹¸ÕÉú³ÉÊ±µÄÂÒ·É ---
-        trail.enabled = false;
-        trail.Clear(); // ÇåÀíµô¿ÉÄÜ´æÔÚµÄ²ĞÁôÊı¾İ
+        // â­ ä¿®æ”¹ï¼šæ£€æµ‹å¯¹ç…§ç»„ã€‚å¦‚æœç¦ç”¨ç‰¹æ•ˆï¼Œç›´æ¥å…³é—­ç»„ä»¶å¹¶è¿”å›ã€‚
+        if (ExperimentVisualControl.Instance != null && !ExperimentVisualControl.Instance.ShouldShowVisuals())
+        {
+            trail.enabled = false;
+            this.enabled = false; // ç¦ç”¨è„šæœ¬è‡ªèº«
+            return;
+        }
 
-        // »ñÈ¡½ø¶È
+        trail.enabled = false;
+        trail.Clear();
+
         float progress = 0f;
         if (BurnRecoverySystem.Instance != null)
         {
             progress = BurnRecoverySystem.Instance.GetRecoveryProgress();
         }
 
-        // Ó¦ÓÃÊÓ¾õ²ÎÊı (ËäÈ»ÏÖÔÚ²»¿É¼û£¬µ«²ÎÊıÏÈÉèºÃ)
         ApplyVisuals(progress);
-
-        // --- 2. ¿ªÆôĞ­³Ì£¬ÑÓ³ÙÏÔÊ¾ ---
         StartCoroutine(EnableTrailAfterDelay());
     }
 
-    // ÑÓ³Ù¿ªÆôµÄĞ­³Ì
     IEnumerator EnableTrailAfterDelay()
     {
-        // µÈ´ıÖ¸¶¨Ê±¼ä
         yield return new WaitForSeconds(showTrailDelay);
-
         if (trail != null)
         {
-            // ÖØÒª£ºÔÚ¿ªÆôÇ°ÔÙ´ÎClear£¬È·±£Ã»ÓĞ¼ÇÂ¼Õâ0.5ÃëÄÚµÄÒÆ¶¯¹ì¼£
-            // ·ñÔò¿ªÆôË²¼ä»áÓĞÒ»ÌõÏß´Ó³öÉúµãÁ¬µ½ÏÖÔÚµÄÎ»ÖÃ
             trail.Clear();
             trail.enabled = true;
         }
@@ -66,29 +53,19 @@ public class SnowballVisualEnhancer : MonoBehaviour
 
     void ApplyVisuals(float progress)
     {
-        // 1. ÑÕÉ«½¥±ä (Color Lerp)
         Gradient gradient = new Gradient();
         Color currentColor = Color.Lerp(startColorLevel0, startColorLevelMax, progress);
 
-        // ÉèÖÃÍÏÎ²ÑÕÉ«£ºÍ·ÊÇµ±Ç°É«£¬Î²°ÍÍ¸Ã÷
         gradient.SetKeys(
             new GradientColorKey[] { new GradientColorKey(currentColor, 0.0f), new GradientColorKey(currentColor, 1.0f) },
             new GradientAlphaKey[] { new GradientAlphaKey(1.0f, 0.0f), new GradientAlphaKey(0.0f, 1.0f) }
         );
         trail.colorGradient = gradient;
 
-        // 2. ¿í¶È½¥±ä
         float currentWidth = Mathf.Lerp(widthLevel0, widthLevelMax, progress);
         trail.widthMultiplier = currentWidth;
 
-        // 3. (¿ÉÑ¡) Èç¹ûÂú¼¶ÁË£¬¿ÉÒÔ¼Ó³¤ÍÏÎ²Ê±¼ä
-        if (progress >= 0.9f)
-        {
-            trail.time = 0.5f; // ÍÏÎ²¸ü³¤
-        }
-        else
-        {
-            trail.time = 0.3f;
-        }
+        if (progress >= 0.9f) trail.time = 0.5f;
+        else trail.time = 0.3f;
     }
 }

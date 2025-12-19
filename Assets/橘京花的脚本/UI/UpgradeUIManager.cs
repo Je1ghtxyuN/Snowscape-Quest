@@ -40,15 +40,13 @@ public class UpgradeUIManager : MonoBehaviour
         if (Camera.main != null) playerCamera = Camera.main.transform;
         if (upgradePanel != null) upgradePanel.SetActive(false);
 
-        // 如果没有配置，添加默认配置（包含寒冰剑）
+        // 如果没有配置，添加默认配置
         if (upgradePool.Count == 0)
         {
             upgradePool.Add(new UpgradeOption { id = "HEAL", displayText = "恢复生命\n<size=60%>回复 30 点血量</size>" });
             upgradePool.Add(new UpgradeOption { id = "DAMAGE", displayText = "力量强化\n<size=60%>提升 20% 伤害</size>" });
             upgradePool.Add(new UpgradeOption { id = "SPEED", displayText = "迅捷步伐\n<size=60%>提升 20% 移速</size>" });
-            // 只有当玩家还没解锁剑的时候，才应该放入池子，这里简化处理，逻辑里判断
             upgradePool.Add(new UpgradeOption { id = "SWORD", displayText = "寒冰之剑\n<size=60%>解锁近战武器 (按B切换)</size>" });
-
             upgradePool.Add(new UpgradeOption { id = "PET_MULTI", displayText = "精灵散射\n<size=60%>精灵子弹数量 +1</size>" });
             upgradePool.Add(new UpgradeOption { id = "PET_RATE", displayText = "精灵急速\n<size=60%>精灵射速提升 25%</size>" });
             upgradePool.Add(new UpgradeOption { id = "PET_DMG", displayText = "精灵强化\n<size=60%>精灵伤害提升 30%</size>" });
@@ -80,22 +78,20 @@ public class UpgradeUIManager : MonoBehaviour
 
     private void RandomizeUpgrades()
     {
-        // 1. 创建一个临时列表，用于筛选有效的升级
         List<UpgradeOption> validPool = new List<UpgradeOption>();
 
         foreach (var option in upgradePool)
         {
-            // ⭐ 核心逻辑：如果是寒冰剑，且已经解锁了，就不加进池子
             if (option.id == "SWORD")
             {
                 if (PlayerUpgradeHandler.Instance != null && !PlayerUpgradeHandler.Instance.IsSwordUnlocked())
                 {
-                    validPool.Add(option); // 还没解锁，可以加
+                    validPool.Add(option);
                 }
             }
             else
             {
-                validPool.Add(option); // 其他升级都可以无限加
+                validPool.Add(option);
             }
         }
 
@@ -105,7 +101,6 @@ public class UpgradeUIManager : MonoBehaviour
             return;
         }
 
-        // 2. 从有效池中随机
         int index1 = Random.Range(0, validPool.Count);
         int index2 = index1;
         while (index2 == index1)
@@ -126,7 +121,6 @@ public class UpgradeUIManager : MonoBehaviour
 
         SpawnVisualEffect();
 
-        // 获取 PlayerUpgradeHandler 单例
         var handler = PlayerUpgradeHandler.Instance;
         if (handler == null)
         {
@@ -136,60 +130,37 @@ public class UpgradeUIManager : MonoBehaviour
 
         switch (upgrade.id)
         {
-            case "HEAL":
-                handler.UpgradeHeal(30f);
-                break;
-
-            case "DAMAGE":
-                handler.UpgradeDamage(0.25f); // 增加 25%
-                break;
-
-            case "SPEED":
-                handler.UpgradeSpeed(0.2f); // 增加 20%
-                break;
-
-            case "SWORD":
-                handler.UnlockSword();
-                break;
-
-            //case "AMMO":
-            //    Debug.Log("弹药升级暂未实现");
-            //    break;
-            case "PET_MULTI":
-                handler.UpgradePetMultishot();
-                break;
-            case "PET_RATE":
-                handler.UpgradePetFireRate(0.25f);
-                break;
-            case "PET_DMG":
-                handler.UpgradePetDamage(0.3f);
-                break;
-
-            default:
-                Debug.LogWarning("未知的升级ID");
-                break;
+            case "HEAL": handler.UpgradeHeal(30f); break;
+            case "DAMAGE": handler.UpgradeDamage(0.25f); break;
+            case "SPEED": handler.UpgradeSpeed(0.2f); break;
+            case "SWORD": handler.UnlockSword(); break;
+            case "PET_MULTI": handler.UpgradePetMultishot(); break;
+            case "PET_RATE": handler.UpgradePetFireRate(0.25f); break;
+            case "PET_DMG": handler.UpgradePetDamage(0.3f); break;
+            default: Debug.LogWarning("未知的升级ID"); break;
         }
     }
 
     private void SpawnVisualEffect()
     {
+        // 播放语音 (心理暗示通常属于听觉干预，对照组一般保留，如果想关掉也可以加判断)
+        if (PlayerVoiceSystem.Instance != null)
+        {
+            PlayerVoiceSystem.Instance.PlayVoice("Level_Up");
+        }
+
+        // ⭐ 修改：核心视觉控制逻辑
+        // 如果是对照组 (ShouldShowVisuals 返回 false)，则直接 return，不生成光柱
+        if (ExperimentVisualControl.Instance != null && !ExperimentVisualControl.Instance.ShouldShowVisuals())
+        {
+            return;
+        }
+
         if (levelUpEffectPrefab != null && playerCamera != null)
         {
-            // ⭐ 新增：播放升级/光柱环绕的心理暗示语音
-            if (PlayerVoiceSystem.Instance != null)
-            {
-                PlayerVoiceSystem.Instance.PlayVoice("Level_Up");
-            }
-            // 1. 生成特效，并将 playerCamera 设置为父物体
-            // 这样特效就会随着相机（玩家）移动而移动
+            // 只有在实验组才会执行这里
             GameObject effect = Instantiate(levelUpEffectPrefab, playerCamera);
-
-            // 2. 设置局部坐标
-            // X=0, Z=0 保证光柱在玩家中心
-            // Y使用 playerFeetOffset (比如 -1.7)，让光柱脚底对齐玩家脚底
             effect.transform.localPosition = new Vector3(0, playerFeetOffset, 0);
-
-            // 3. 重置旋转
             effect.transform.localRotation = Quaternion.identity;
         }
         else
